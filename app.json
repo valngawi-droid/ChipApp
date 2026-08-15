@@ -52,18 +52,6 @@
     ],
     "extra": {
       "googleClientId": "68960926780-ti5kaoq71pvg7mb54am9q4176nvcee2i.apps.googleusercontent.com"
-    },
-    "locales": {
-      "id": "./assets/loc/id.json",
-      "en": "./assets/loc/en.json",
-      "es": "./assets/loc/es.json",
-      "fr": "./assets/loc/fr.json",
-      "de": "./assets/loc/de.json",
-      "ar": "./assets/loc/ar.json",
-      "ja": "./assets/loc/ja.json",
-      "zh": "./assets/loc/zh.json",
-      "pt": "./assets/loc/pt.json",
-      "ru": "./assets/loc/ru.json"
     }
   }
 }
