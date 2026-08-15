@@ -8,7 +8,8 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
 import { useLocalization } from '../i18n';
 import { useAppStore } from '../state/useAppStore';
-import { authenticateDemo, authenticateWithGoogle } from '../api/auth';
+import { authenticateDemo } from '../api/auth';
+import { signInWithGoogle } from '../api/googleAuth';
 import { haptics } from '../utils/haptics';
 import LanguagePicker from '../components/LanguagePicker';
 
@@ -32,36 +33,42 @@ export const LoginScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const setAuthData = useAppStore((s) => s.setAuthData);
 
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<'google' | 'demo' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [langOpen, setLangOpen] = useState(false);
 
-  const signIn = async () => {
+  const signInGoogle = async () => {
     haptics.medium();
-    setBusy(true);
+    setBusy('google');
     setError(null);
     try {
-      /**
-       * Production flow: obtain a Google ID token from the native Google
-       * Sign-In SDK / expo-auth-session and verify it server-side.
-       *
-       * The sandboxed preview origin is not registered with the OAuth client,
-       * so the consent screen cannot complete here. We attempt the real
-       * exchange when a token is present and otherwise fall back to the
-       * backend's sample-profile endpoint, which still returns a genuine
-       * signed JWT so the rest of the app behaves identically.
-       */
-      const idToken = (globalThis as { __CHIPAPP_GOOGLE_ID_TOKEN__?: string })
-        .__CHIPAPP_GOOGLE_ID_TOKEN__;
+      const res = await signInWithGoogle();
+      haptics.success();
+      setAuthData(res.user, res.token);
+    } catch (e) {
+      const err = e as Error & { cancelled?: boolean };
+      if (!err.cancelled) {
+        haptics.error();
+        setError(err.message ?? 'Gagal masuk dengan Google');
+      }
+    } finally {
+      setBusy(null);
+    }
+  };
 
-      const res = idToken ? await authenticateWithGoogle(idToken) : await authenticateDemo();
+  const signInDemo = async () => {
+    haptics.selection();
+    setBusy('demo');
+    setError(null);
+    try {
+      const res = await authenticateDemo();
       haptics.success();
       setAuthData(res.user, res.token);
     } catch (e) {
       haptics.error();
-      setError(e instanceof Error ? e.message : 'Sign-in failed');
+      setError(e instanceof Error ? e.message : 'Gagal masuk demo');
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   };
 
@@ -98,10 +105,10 @@ export const LoginScreen: React.FC = () => {
           </View>
 
           <Pressable
-            onPress={signIn}
-            disabled={busy}
+            onPress={signInGoogle}
+            disabled={!!busy}
             accessibilityRole="button"
-            accessibilityLabel={t('loginWithGoogle')}
+            accessibilityLabel={t('signInGoogle')}
             style={({ pressed }) => [
               styles.googleBtn,
               {
@@ -111,15 +118,44 @@ export const LoginScreen: React.FC = () => {
               },
             ]}
           >
-            {busy ? (
+            {busy === 'google' ? (
               <ActivityIndicator color="#3C4043" />
             ) : (
               <>
                 <GoogleMark />
-                <Text style={[typography.headline, { color: '#3C4043' }]}>{t('loginWithGoogle')}</Text>
+                <Text style={[typography.headline, { color: '#3C4043' }]}>{t('signInGoogle')}</Text>
               </>
             )}
           </Pressable>
+
+          <View style={styles.dividerRow}>
+            <View style={[styles.divider, { backgroundColor: '#FFFFFF40' }]} />
+            <Text style={[typography.footnote, { color: '#FFFFFFB3' }]}>{t('orContinue')}</Text>
+            <View style={[styles.divider, { backgroundColor: '#FFFFFF40' }]} />
+          </View>
+
+          <Pressable
+            onPress={signInDemo}
+            disabled={!!busy}
+            accessibilityRole="button"
+            accessibilityLabel={t('tryDemo')}
+            style={({ pressed }) => [
+              styles.demoBtn,
+              {
+                borderRadius: radius.md,
+                opacity: busy ? 0.7 : pressed ? 0.85 : 1,
+                transform: [{ scale: pressed ? 0.985 : 1 }],
+              },
+            ]}
+          >
+            {busy === 'demo' ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={[typography.headline, { color: '#FFFFFF' }]}>{t('tryDemo')}</Text>
+            )}
+          </Pressable>
+
+          <Text style={[typography.caption1, styles.demoNote]}>{t('demoNotice')}</Text>
 
           {!!error && (
             <Text style={[typography.footnote, styles.error]} accessibilityLiveRegion="polite">
@@ -185,6 +221,21 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
   },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  divider: { flex: 1, height: StyleSheet.hairlineWidth },
+  demoBtn: {
+    height: 50,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.28)',
+    ...Platform.select({
+      web: { cursor: 'pointer' },
+      default: {},
+    }),
+  },
+  demoNote: { color: '#FFFFFFB3', textAlign: 'center', lineHeight: 17, marginTop: -4 },
   error: { color: '#FFE5E5', textAlign: 'center' },
   terms: { color: '#FFFFFFB3', textAlign: 'center', lineHeight: 17 },
 });

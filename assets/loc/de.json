@@ -111,5 +111,13 @@
   "unmuteChat": "Stummschaltung aufheben",
   "chatUnavailable": "Chat nicht verfügbar",
   "noResults": "Keine Ergebnisse",
-  "defaultUser": "ChipApp-Nutzer"
+  "defaultUser": "ChipApp-Nutzer",
+  "tryDemo": "Coba Demo",
+  "orContinue": "atau lanjut tanpa akun",
+  "signInGoogle": "Masuk dengan Google",
+  "signInDemo": "Masuk sebagai tamu",
+  "demoNotice": "Mode demo memakai profil contoh. Login Google untuk akun asli.",
+  "appearanceSystem": "Ikuti sistem",
+  "appearanceLight": "Terang",
+  "appearanceDark": "Gelap"
 }

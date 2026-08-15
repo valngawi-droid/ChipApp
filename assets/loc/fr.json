@@ -111,5 +111,13 @@
   "unmuteChat": "Réactiver",
   "chatUnavailable": "Discussion indisponible",
   "noResults": "Aucun résultat",
-  "defaultUser": "Utilisateur ChipApp"
+  "defaultUser": "Utilisateur ChipApp",
+  "tryDemo": "Coba Demo",
+  "orContinue": "atau lanjut tanpa akun",
+  "signInGoogle": "Masuk dengan Google",
+  "signInDemo": "Masuk sebagai tamu",
+  "demoNotice": "Mode demo memakai profil contoh. Login Google untuk akun asli.",
+  "appearanceSystem": "Ikuti sistem",
+  "appearanceLight": "Terang",
+  "appearanceDark": "Gelap"
 }

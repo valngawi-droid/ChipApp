@@ -114,6 +114,7 @@ interface AppState {
   typingChatIds: string[];
 
   setAuthData: (user: AppUser, token: string) => void;
+  hydrate: (user: AppUser, token: string) => void;
   logout: () => void;
   setConnection: (c: ConnectionState) => void;
   setPeers: (peers: RemoteUser[]) => void;
@@ -175,6 +176,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   typingChatIds: [],
 
   setAuthData: (user, token) => {
+    const avatarColor = user.avatarColor ?? colorFor(user.id || user.email);
+    set({ user: { ...user, avatarColor }, token, isAuthenticated: true });
+  },
+  hydrate: (user, token) => {
+    // Like setAuthData but without emitting a "new sign in" side effect; used
+    // when restoring a session from storage on launch.
     const avatarColor = user.avatarColor ?? colorFor(user.id || user.email);
     set({ user: { ...user, avatarColor }, token, isAuthenticated: true });
   },

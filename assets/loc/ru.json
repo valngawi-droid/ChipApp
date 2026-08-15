@@ -111,5 +111,13 @@
   "unmuteChat": "Включить звук",
   "chatUnavailable": "Чат недоступен",
   "noResults": "Нет результатов",
-  "defaultUser": "Пользователь ChipApp"
+  "defaultUser": "Пользователь ChipApp",
+  "tryDemo": "Coba Demo",
+  "orContinue": "atau lanjut tanpa akun",
+  "signInGoogle": "Masuk dengan Google",
+  "signInDemo": "Masuk sebagai tamu",
+  "demoNotice": "Mode demo memakai profil contoh. Login Google untuk akun asli.",
+  "appearanceSystem": "Ikuti sistem",
+  "appearanceLight": "Terang",
+  "appearanceDark": "Gelap"
 }

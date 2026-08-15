@@ -15,7 +15,40 @@ import {
   socket,
   teardownSocket,
 } from './src/api/socket';
-import type { Message } from './src/state/useAppStore';
+import { STORAGE_KEYS, storage } from './src/storage';
+import type { AppUser, Message } from './src/state/useAppStore';
+
+/** Restores the last signed-in session from storage on cold start. */
+const SessionRestore: React.FC = () => {
+  const hydrate = useAppStore((s) => s.hydrate);
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const token = useAppStore((s) => s.token);
+  const user = useAppStore((s) => s.user);
+
+  useEffect(() => {
+    let active = true;
+    storage.getJson<{ user: AppUser; token: string }>(STORAGE_KEYS.session).then((saved) => {
+      if (active && saved?.token && saved.user && !isAuthenticated) {
+        hydrate(saved.user, saved.token);
+      }
+    });
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist whenever the session changes (login/logout).
+  useEffect(() => {
+    if (isAuthenticated && token && user) {
+      void storage.setJson(STORAGE_KEYS.session, { user, token });
+    } else {
+      void storage.remove(STORAGE_KEYS.session);
+    }
+  }, [isAuthenticated, token, user]);
+
+  return null;
+};
 
 /** Bridges socket lifecycle + inbound events into the Zustand store. */
 const RealtimeBridge: React.FC = () => {
@@ -30,6 +63,7 @@ const RealtimeBridge: React.FC = () => {
   const applyReaction = useAppStore((s) => s.applyReaction);
   const activeChatId = useAppStore((s) => s.activeChatId);
   const ensureChatForPeer = useAppStore((s) => s.ensureChatForPeer);
+  const logout = useAppStore((s) => s.logout);
 
   // Refresh the user directory periodically while signed in.
   useEffect(() => {
@@ -67,6 +101,15 @@ const RealtimeBridge: React.FC = () => {
     const onConnect = () => setConnection('connected');
     const onDisconnect = () => setConnection('offline');
     const onError = () => setConnection('offline');
+
+    // If the server rejects our stored token (e.g. rotated secret), drop the
+    // session so the user is sent back to the sign-in screen.
+    const onConnectError = (err: Error & { data?: { status?: number } }) => {
+      if (err?.data?.status === 401) {
+        teardownSocket();
+        logout();
+      }
+    };
 
     const onReceive = (data: {
       room: string;
@@ -138,6 +181,7 @@ const RealtimeBridge: React.FC = () => {
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('connect_error', onError);
+    socket.on('connect_error', onConnectError);
     socket.on('receive_message', onReceive);
     socket.on('peer_typing', onPeerTyping);
     socket.on('message_ack', onAck);
@@ -149,6 +193,7 @@ const RealtimeBridge: React.FC = () => {
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
       socket.off('connect_error', onError);
+      socket.off('connect_error', onConnectError);
       socket.off('receive_message', onReceive);
       socket.off('peer_typing', onPeerTyping);
       socket.off('message_ack', onAck);
@@ -168,6 +213,7 @@ const RealtimeBridge: React.FC = () => {
     applyMessageAck,
     applyReaction,
     ensureChatForPeer,
+    logout,
   ]);
 
   return null;
@@ -178,6 +224,7 @@ const Shell: React.FC = () => {
   return (
     <View style={[styles.flex, { backgroundColor: colors.systemBackground }]}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      <SessionRestore />
       <RealtimeBridge />
       <RootNavigator />
     </View>

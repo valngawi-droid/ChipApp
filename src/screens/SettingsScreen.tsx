@@ -12,6 +12,7 @@ import { formatBytes, safetyNumber } from '../utils';
 import Avatar from '../components/Avatar';
 import IOSNavigationBar from '../components/iOSNavigationBar';
 import LanguagePicker from '../components/LanguagePicker';
+import IOSActionSheet from '../components/iOSActionSheet';
 import { Row, Section } from '../components/GroupedList';
 import { teardownSocket } from '../api/socket';
 
@@ -25,6 +26,7 @@ export const SettingsScreen: React.FC = () => {
   const connection = useAppStore((s) => s.connection);
 
   const [langOpen, setLangOpen] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
   const [readReceipts, setReadReceipts] = useState(true);
   const [twoStep, setTwoStep] = useState(false);
   const [securityNotifications, setSecurityNotifications] = useState(true);
@@ -159,8 +161,7 @@ export const SettingsScreen: React.FC = () => {
             showChevron
             onPress={() => {
               haptics.selection();
-              const order: ThemePreference[] = ['system', 'light', 'dark'];
-              setPreference(order[(order.indexOf(preference) + 1) % order.length]);
+              setThemeOpen(true);
             }}
           />
         </Section>
@@ -172,12 +173,38 @@ export const SettingsScreen: React.FC = () => {
           <Row title={t('inviteFriend')} icon="heart" iconColor="#FF2D55" showChevron onPress={haptics.selection} />
         </Section>
 
-        <Section footer={`ChipApp 4.2.0 · Build 4200${'\n'}${t('madeWithLove')}`}>
+        <Section footer={`ChipApp 4.3.0 · Build 4300${'\n'}${t('madeWithLove')}`}>
           <Row title={t('signOut')} destructive onPress={confirmSignOut} />
         </Section>
       </Animated.ScrollView>
 
       <LanguagePicker visible={langOpen} onClose={() => setLangOpen(false)} />
+
+      <IOSActionSheet
+        visible={themeOpen}
+        title={t('appearance')}
+        onClose={() => setThemeOpen(false)}
+        options={[
+          {
+            key: 'system',
+            label: t('appearanceSystem'),
+            icon: 'phone-portrait-outline',
+            onPress: () => setPreference('system'),
+          },
+          {
+            key: 'light',
+            label: t('appearanceLight'),
+            icon: 'sunny-outline',
+            onPress: () => setPreference('light'),
+          },
+          {
+            key: 'dark',
+            label: t('appearanceDark'),
+            icon: 'moon-outline',
+            onPress: () => setPreference('dark'),
+          },
+        ]}
+      />
     </View>
   );
 };

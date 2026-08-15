@@ -127,6 +127,17 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+app.post('/api/auth/google/exchange', async (req, res) => {
+  const { googleId, email, name, picture } = req.body || {};
+  if (!googleId || !email) {
+    return res.status(400).json({ status: 'error', message: 'Missing Google profile' });
+  }
+  const id = `g-${googleId}`;
+  const user = { id, googleId, email, name: name || email, picture: picture ?? null, lastSeen: Date.now() };
+  users.set(id, user);
+  return res.status(200).json({ status: 'success', token: issueSession(user), user: publicUser(user) });
+});
+
 app.post('/api/auth/google', async (req, res) => {
   const { token } = req.body || {};
   if (!token) {

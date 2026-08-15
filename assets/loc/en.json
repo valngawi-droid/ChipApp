@@ -111,5 +111,13 @@
   "unmuteChat": "Unmute",
   "chatUnavailable": "Chat unavailable",
   "noResults": "No results",
-  "defaultUser": "ChipApp User"
+  "defaultUser": "ChipApp User",
+  "tryDemo": "Try Demo",
+  "orContinue": "or continue without an account",
+  "signInGoogle": "Sign in with Google",
+  "signInDemo": "Continue as guest",
+  "demoNotice": "Demo mode uses a sample profile. Sign in with Google for your real account.",
+  "appearanceSystem": "System",
+  "appearanceLight": "Light",
+  "appearanceDark": "Dark"
 }
