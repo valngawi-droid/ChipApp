@@ -18,7 +18,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = Number(process.env.PORT || 3000);
+const PORT = Number(process.env.WEB_PORT || process.env.PORT || 3000);
 const BACKEND_HOST = process.env.BACKEND_HOST || '127.0.0.1';
 const BACKEND_PORT = Number(process.env.BACKEND_PORT || 4000);
 const DIST = path.join(__dirname, '..', 'dist');
