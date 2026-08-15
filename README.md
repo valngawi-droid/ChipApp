@@ -38,6 +38,32 @@ npm run dev        # backend (:4000) + Expo web (:3000) together
 
 ---
 
+## Running the server on Android (Termux)
+
+The backend is **pure JavaScript** — no native modules, so no `node-gyp`,
+`python` or `clang` toolchain is required. That makes it practical to host
+straight from an Android phone.
+
+```bash
+pkg install git nodejs-lts -y
+git clone https://github.com/valngawi-droid/ChipApp.git
+cd ChipApp/backend
+bash termux-setup.sh     # installs deps, generates a random JWT_SECRET, self-tests
+npm start
+```
+
+Point the app at that phone with `EXPO_PUBLIC_API_URL`:
+
+```bash
+EXPO_PUBLIC_API_URL=http://192.168.1.10:4000 npm run web
+```
+
+Full walkthrough — wake-locks, battery optimisation, `tmux`, Cloudflare Tunnel
+and a troubleshooting table — is in **[backend/TERMUX.md](backend/TERMUX.md)**
+(written in Indonesian).
+
+---
+
 ## Architecture
 
 ```

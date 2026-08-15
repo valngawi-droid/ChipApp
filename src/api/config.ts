@@ -11,10 +11,22 @@ import { Platform } from 'react-native';
  * Native: point at an explicit base URL — the tunnel domain in production, or a
  * LAN address during development.
  */
-const NATIVE_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL ?? 'https://chipapp-tunnel.example.com';
+const EXPLICIT_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
-export const API_BASE_URL = Platform.OS === 'web' ? '' : NATIVE_BASE_URL;
+const NATIVE_BASE_URL = EXPLICIT_BASE_URL ?? 'https://chipapp-tunnel.example.com';
+
+/**
+ * On web we normally use the page origin (empty string) so the Metro proxy —
+ * or the Cloudflare Tunnel in production — forwards /api and /socket.io to the
+ * backend. But when EXPO_PUBLIC_API_URL is set explicitly the user is pointing
+ * the app at a backend somewhere else (e.g. a phone running Termux on the LAN),
+ * so that wins on every platform.
+ *
+ * Note for web + a remote backend: the browser enforces CORS, and the server
+ * already sends permissive CORS headers for both REST and Socket.io.
+ */
+export const API_BASE_URL =
+  Platform.OS === 'web' ? EXPLICIT_BASE_URL ?? '' : NATIVE_BASE_URL;
 
 export const GOOGLE_CLIENT_ID =
   process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ??
