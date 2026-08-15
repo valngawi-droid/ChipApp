@@ -31,21 +31,21 @@ const dicts = Object.fromEntries(
 const EXPECTED = ['en', 'id', 'es', 'fr', 'de', 'ar', 'ja', 'zh', 'pt', 'ru'];
 check(`all ${EXPECTED.length} locales present`, EXPECTED.every((l) => dicts[l]), `found ${Object.keys(dicts).join(',')}`);
 
-const baseKeys = Object.keys(dicts.en).filter((k) => k !== '$meta').sort();
+const baseKeys = Object.keys(dicts.en).filter((k) => k !== '_meta').sort();
 check('English base has keys', baseKeys.length > 50, `${baseKeys.length} keys`);
 
 Object.entries(dicts).forEach(([code, dict]) => {
-  const keys = Object.keys(dict).filter((k) => k !== '$meta').sort();
+  const keys = Object.keys(dict).filter((k) => k !== '_meta').sort();
   const missing = baseKeys.filter((k) => !keys.includes(k));
   const extra = keys.filter((k) => !baseKeys.includes(k));
   const empty = keys.filter((k) => !String(dict[k]).trim());
   check(`${code}: key parity`, missing.length === 0 && extra.length === 0, `missing=${missing.join(',')} extra=${extra.join(',')}`);
   check(`${code}: no empty values`, empty.length === 0, empty.join(','));
-  check(`${code}: has $meta`, !!dict.$meta && !!dict.$meta.nativeName && !!dict.$meta.flag);
+  check(`${code}: has _meta`, !!dict._meta && !!dict._meta.nativeName && !!dict._meta.flag);
 });
 
-check('Arabic flagged RTL', dicts.ar.$meta.rtl === true);
-check('non-Arabic are LTR', ['en', 'id', 'es', 'fr', 'de', 'ja', 'zh', 'pt', 'ru'].every((l) => dicts[l].$meta.rtl === false));
+check('Arabic flagged RTL', dicts.ar._meta.rtl === true);
+check('non-Arabic are LTR', ['en', 'id', 'es', 'fr', 'de', 'ja', 'zh', 'pt', 'ru'].every((l) => dicts[l]._meta.rtl === false));
 
 // Translations must not be copies of English (except intentional shared words).
 // Words that are legitimately spelled the same as English in some target

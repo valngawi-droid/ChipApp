@@ -23,7 +23,7 @@ import ru from '../../assets/loc/ru.json';
 export type LocaleCode = 'en' | 'id' | 'es' | 'fr' | 'de' | 'ar' | 'ja' | 'zh' | 'pt' | 'ru';
 
 type Dictionary = typeof en;
-export type TranslationKey = Exclude<keyof Dictionary, '$meta'>;
+export type TranslationKey = Exclude<keyof Dictionary, '_meta'>;
 
 export const translations: Record<LocaleCode, Dictionary> = {
   en,
@@ -57,10 +57,10 @@ export interface LanguageDescriptor {
 
 export const SUPPORTED_LANGUAGES: LanguageDescriptor[] = LOCALE_ORDER.map((code) => ({
   code,
-  ...translations[code].$meta,
+  ...translations[code]._meta,
 }));
 
-export const isRTL = (locale: LocaleCode) => translations[locale].$meta.rtl;
+export const isRTL = (locale: LocaleCode) => translations[locale]._meta.rtl;
 
 interface LocalizationValue {
   locale: LocaleCode;
