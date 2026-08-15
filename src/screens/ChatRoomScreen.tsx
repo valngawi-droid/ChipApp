@@ -25,7 +25,14 @@ import ReactionPicker from '../components/ChatBubble/ReactionPicker';
 import IOSActionSheet from '../components/iOSActionSheet';
 import StickerPicker from '../components/StickerPicker';
 import type { RootStackParamList } from '../navigation/types';
-import { emitTyping, joinChat, leaveChat, sendWireMessage } from '../api/socket';
+import {
+  emitReadReceipt,
+  emitReaction,
+  emitTyping,
+  joinChat,
+  leaveChat,
+  sendWireMessage,
+} from '../api/socket';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ChatRoom'>;
 
@@ -40,7 +47,9 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
   const updateMessageStatus = useAppStore((s) => s.updateMessageStatus);
   const toggleReaction = useAppStore((s) => s.toggleReaction);
   const setActiveChat = useAppStore((s) => s.setActiveChat);
+  const markChatRead = useAppStore((s) => s.markChatRead);
   const typingChatIds = useAppStore((s) => s.typingChatIds);
+  const user = useAppStore((s) => s.user);
 
   const [draft, setDraft] = useState('');
   const [replyTo, setReplyTo] = useState<Message | null>(null);
@@ -50,8 +59,27 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const listRef = useRef<ScrollView>(null);
   const sendScale = useSharedValue(0);
+  const typingStopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const hasDraft = draft.trim().length > 0;
+
+  const clearTypingTimer = useCallback(() => {
+    if (typingStopTimer.current) {
+      clearTimeout(typingStopTimer.current);
+      typingStopTimer.current = null;
+    }
+  }, []);
+
+  const signalTyping = useCallback(
+    (typing: boolean) => {
+      emitTyping(chatId, typing);
+      if (typing) {
+        clearTypingTimer();
+        typingStopTimer.current = setTimeout(() => emitTyping(chatId, false), 4000);
+      }
+    },
+    [chatId, clearTypingTimer]
+  );
 
   useEffect(() => {
     sendScale.value = withSpring(hasDraft ? 1 : 0, springs.snappy);
@@ -60,11 +88,16 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
   useEffect(() => {
     setActiveChat(chatId);
     joinChat(chatId);
+    markChatRead(chatId);
+    // Let peers know their messages are read when opening the room.
+    emitReadReceipt(chatId);
     return () => {
+      clearTypingTimer();
+      emitTyping(chatId, false);
       setActiveChat(null);
       leaveChat(chatId);
     };
-  }, [chatId, setActiveChat]);
+  }, [chatId, setActiveChat, markChatRead, clearTypingTimer]);
 
   const sendStyle = useAnimatedStyle(() => ({
     transform: [{ scale: sendScale.value }],
@@ -99,20 +132,14 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
         : null,
     });
 
-    sendWireMessage({ room: chat.id, id, text, timestamp, kind: 'text' });
+    sendWireMessage({ room: chat.id, id, text, timestamp, kind: 'text', author: user?.id });
 
     setDraft('');
     setReplyTo(null);
-    emitTyping(chat.id, false);
-
-    // Local delivery/read progression so the receipt animation is observable
-    // even without a second connected client.
-    setTimeout(() => updateMessageStatus(chat.id, id, 'sent'), 320);
-    setTimeout(() => updateMessageStatus(chat.id, id, 'delivered'), 900);
-    setTimeout(() => updateMessageStatus(chat.id, id, 'read'), 2200);
+    signalTyping(false);
 
     requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
-  }, [draft, chat, replyTo, sendMessage, updateMessageStatus, t]);
+  }, [draft, chat, replyTo, sendMessage, updateMessageStatus, t, signalTyping]);
 
   const handleSendSticker = useCallback(
     (packId: string, stickerId: string, source: number) => {
@@ -129,8 +156,14 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
         kind: 'sticker',
         stickerSource: source,
       });
-      sendWireMessage({ room: chat.id, id, text: `${packId}/${stickerId}`, timestamp, kind: 'sticker' });
-      setTimeout(() => updateMessageStatus(chat.id, id, 'delivered'), 700);
+      sendWireMessage({
+        room: chat.id,
+        id,
+        text: `${packId}/${stickerId}`,
+        timestamp,
+        kind: 'sticker',
+        author: user?.id,
+      });
       requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
     },
     [chat, sendMessage, updateMessageStatus]
@@ -301,7 +334,7 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
               value={draft}
               onChangeText={(v) => {
                 setDraft(v);
-                emitTyping(chat.id, v.length > 0);
+                signalTyping(v.length > 0);
               }}
               placeholder={t('typeMessage')}
               placeholderTextColor={colors.placeholder}
@@ -369,7 +402,17 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
         anchor={reactionTarget ? { x: 0, y: reactionTarget.y } : null}
         onClose={() => setReactionTarget(null)}
         onSelect={(emoji) => {
-          if (reactionTarget) toggleReaction(chat.id, reactionTarget.message.id, emoji);
+          if (reactionTarget) {
+            toggleReaction(chat.id, reactionTarget.message.id, emoji);
+            // Broadcast to peers so the reaction is real-time; the local
+            // optimistic update is applied immediately by toggleReaction.
+            if (reactionTarget.message.id.startsWith('local-')) {
+              // No server id yet; the ack will rename it. For reactions sent
+              // before ack we fall through silently; users can retry after.
+            } else {
+              emitReaction(chat.id, reactionTarget.message.id, emoji);
+            }
+          }
           setReactionTarget(null);
         }}
       />

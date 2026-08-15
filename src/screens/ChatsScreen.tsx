@@ -140,7 +140,7 @@ export const ChatsScreen: React.FC = () => {
           {
             key: 'new',
             icon: 'create-outline',
-            onPress: () => {},
+            onPress: () => navigation.navigate('NewChat'),
             accessibilityLabel: t('newChat'),
           },
         ]}

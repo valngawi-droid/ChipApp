@@ -30,23 +30,27 @@ const { server } = require(path.join(__dirname, '..', 'backend', 'server.js'));
 const waitListening = () =>
   new Promise((resolve) => (server.listening ? resolve() : server.once('listening', resolve)));
 
+const signIn = (name) =>
+  fetch(`${BASE}/api/auth/demo`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  }).then((r) => r.json());
+
+const directId = (a, b) => [a, b].sort().join('::');
+
 (async () => {
   await waitListening();
   console.log('=== REST ===');
 
   const health = await (await fetch(`${BASE}/api/health`)).json();
   check('health ok', health.status === 'ok' && health.service === 'chipapp-backend', JSON.stringify(health));
-  check('health reports version', health.version === '4.2.0');
+  check('health reports version', health.version === '4.3.0');
 
-  // Demo auth issues a real, verifiable JWT.
-  const authRes = await fetch(`${BASE}/api/auth/demo`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: 'Test User' }),
-  });
-  const auth = await authRes.json();
-  check('demo auth 200', authRes.status === 200 && auth.status === 'success');
+  const auth = await signIn('Test User');
+  check('demo auth 200', auth.status === 'success');
   check('returns user profile', !!auth.user && auth.user.name === 'Test User');
+  check('profile has stable id', !!auth.user.id && auth.user.id.startsWith('demo-'));
 
   let decoded = null;
   try {
@@ -57,44 +61,48 @@ const waitListening = () =>
   check('JWT verifies with secret', !!decoded && decoded.name === 'Test User');
   check('JWT has 30d expiry', !!decoded && decoded.exp - decoded.iat === 30 * 24 * 3600);
 
-  // Tampered token must be rejected.
-  const bad = `${auth.token.slice(0, -3)}xyz`;
-  const meBad = await fetch(`${BASE}/api/me`, { headers: { Authorization: `Bearer ${bad}` } });
-  check('tampered JWT rejected (401)', meBad.status === 401, `got ${meBad.status}`);
+  const me = await fetch(`${BASE}/api/me`, { headers: { Authorization: `Bearer ${auth.token}` } }).then((r) => r.json());
+  check('valid token accepted', me.user && me.user.name === 'Test User');
 
+  const meBad = await fetch(`${BASE}/api/me`, { headers: { Authorization: `Bearer ${auth.token}xxx` } });
+  check('tampered JWT rejected (401)', meBad.status === 401);
   const meNone = await fetch(`${BASE}/api/me`);
   check('missing token rejected (401)', meNone.status === 401);
 
-  const meOk = await fetch(`${BASE}/api/me`, { headers: { Authorization: `Bearer ${auth.token}` } });
-  const meBody = await meOk.json();
-  check('valid token accepted', meOk.status === 200 && meBody.user.name === 'Test User');
-
-  // Google endpoint must reject junk, and must not accept a self-signed token.
   const gBad = await fetch(`${BASE}/api/auth/google`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: 'not-a-token' }),
   });
   check('google: invalid id token -> 401', gBad.status === 401);
-
   const forged = jwt.sign({ sub: '1', email: 'a@b.c' }, SECRET);
   const gForged = await fetch(`${BASE}/api/auth/google`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: forged }),
   });
-  check('google: forged token -> 401', gForged.status === 401, `got ${gForged.status}`);
-
+  check('google: forged token -> 401', gForged.status === 401);
   const gEmpty = await fetch(`${BASE}/api/auth/google`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}),
   });
   check('google: missing token -> 400', gEmpty.status === 400);
 
+  // Direct chat creation.
+  const peer = await signIn('Peer Friend');
+  const direct = await fetch(`${BASE}/api/chats/direct`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${auth.token}` },
+    body: JSON.stringify({ peerId: peer.user.id }),
+  }).then((r) => r.json());
+  check('create direct chat', direct.chat && direct.chat.peer.name === 'Peer Friend');
+  check('direct room id convention', direct.chat.id === directId(auth.user.id, peer.user.id));
+
+  const list = await fetch(`${BASE}/api/users`, { headers: { Authorization: `Bearer ${auth.token}` } }).then((r) => r.json());
+  check('user directory lists peer', list.users.some((u) => u.id === peer.user.id));
+
   /* ------------------------------- realtime ------------------------------- */
   console.log('\n=== Socket.io ===');
-  const room = 'test-room';
+  const room = direct.chat.id;
 
   const a = io(BASE, { transports: ['websocket'], auth: { token: auth.token }, forceNew: true });
-  const b = io(BASE, { transports: ['websocket'], auth: { token: auth.token }, forceNew: true });
+  const b = io(BASE, { transports: ['websocket'], auth: { token: peer.token }, forceNew: true });
 
-  // 'ready' is emitted by the server the instant the socket connects, so the
-  // listener must be attached before awaiting the connection.
   const readyPromise = new Promise((res) => a.once('ready', res));
 
   const connected = await Promise.all([
@@ -107,13 +115,12 @@ const waitListening = () =>
     readyPromise,
     new Promise((r) => setTimeout(() => r({ identity: null }), 2500)),
   ]);
-  check('server verifies socket JWT', identity.identity && identity.identity.includes('test.user'), JSON.stringify(identity));
+  check('socket attaches verified identity', identity.userId === auth.user.id, JSON.stringify(identity));
 
   a.emit('join_chat', room);
   b.emit('join_chat', room);
   await new Promise((r) => setTimeout(r, 250));
 
-  // B should receive A's message; A should get an ack but not its own echo.
   const received = new Promise((res) => b.on('receive_message', res));
   const acked = new Promise((res) => a.on('message_ack', res));
   let selfEcho = false;
@@ -123,28 +130,36 @@ const waitListening = () =>
   a.emit('send_message', payload);
 
   const got = await Promise.race([received, new Promise((r) => setTimeout(() => r(null), 2500))]);
-  check('peer receives message', got && got.text === 'hello from A', JSON.stringify(got));
+  check('peer receives message', got && got.text === 'hello from A' && got.author === auth.user.id, JSON.stringify(got));
 
   const ack = await Promise.race([acked, new Promise((r) => setTimeout(() => r(null), 2500))]);
   check('sender gets delivery ack', ack && ack.id === 'm-1' && ack.status === 'delivered');
   check('no self-echo to sender', selfEcho === false);
 
-  // Typing indicator relay.
+  // Real-time reaction broadcast.
+  const reaction = new Promise((res) => a.on('reaction', res));
+  b.emit('react', { room, messageId: got ? got.id : 'm-1', emoji: '👍' });
+  const reacted = await Promise.race([reaction, new Promise((r) => setTimeout(() => r(null), 2000))]);
+  check('reaction broadcast', reacted && reacted.emoji === '👍' && reacted.reactions['👍'].includes(peer.user.id), JSON.stringify(reacted));
+
+  // Typing relay.
   const typing = new Promise((res) => b.on('peer_typing', res));
   a.emit('typing', { room, typing: true });
   const typed = await Promise.race([typing, new Promise((r) => setTimeout(() => r(null), 2000))]);
   check('typing indicator relayed', typed && typed.typing === true);
 
-  // Room isolation: a client in another room must not receive the message.
+  // Anonymous sockets cannot message.
   const c = io(BASE, { transports: ['websocket'], forceNew: true });
   await new Promise((res) => c.on('connect', res));
-  c.emit('join_chat', 'other-room');
+  c.emit('join_chat', room);
   await new Promise((r) => setTimeout(r, 200));
-  let leaked = false;
-  c.on('receive_message', () => { leaked = true; });
-  a.emit('send_message', { room, id: 'm-2', text: 'private', timestamp: new Date().toISOString() });
+  let anonymousDelivered = false;
+  b.on('receive_message', (msg) => {
+    if (msg.id === 'evil') anonymousDelivered = true;
+  });
+  c.emit('send_message', { room, id: 'evil', text: 'spam', timestamp: new Date().toISOString() });
   await new Promise((r) => setTimeout(r, 600));
-  check('messages isolated per room', leaked === false);
+  check('anonymous cannot inject messages', anonymousDelivered === false);
 
   [a, b, c].forEach((s) => s.close());
   server.close();

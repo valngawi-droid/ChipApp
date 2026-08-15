@@ -366,3 +366,25 @@ export const seedChannels: Channel[] = [
   { id: 'ch2', name: 'Tech Daily', avatarColor: avatarColors.blue, verified: true, followers: 892_400, latest: 'Apple mengumumkan panduan HIG terbaru.', timestamp: hoursAgo(11) },
   { id: 'ch3', name: 'Jakarta Traffic', avatarColor: avatarColors.orange, verified: false, followers: 45_200, latest: 'Tol dalam kota lancar pagi ini.', timestamp: daysAgo(1) },
 ];
+
+/**
+ * Demo peers shown in the "new chat" picker before any live users have
+ * connected. They use synthetic ids that the backend treats as demo users
+ * once the same person signs in with the matching demo name.
+ */
+export interface SeedPeer {
+  id: string;
+  name: string;
+  email: string;
+  avatarColor: string;
+  online: boolean;
+}
+
+export const seedPeers: SeedPeer[] = [
+  { id: 'demo-nadia-pratiwi', name: 'Nadia Pratiwi', email: 'nadia-pratiwi@chipapp.demo', avatarColor: avatarColors.pink, online: true },
+  { id: 'demo-budi-santoso', name: 'Budi Santoso', email: 'budi-santoso@chipapp.demo', avatarColor: avatarColors.blue, online: false },
+  { id: 'demo-siti-rahma', name: 'Siti Rahma', email: 'siti-rahma@chipapp.demo', avatarColor: avatarColors.green, online: true },
+  { id: 'demo-arif-wijaya', name: 'Arif Wijaya', email: 'arif-wijaya@chipapp.demo', avatarColor: avatarColors.indigo, online: false },
+  { id: 'demo-dewi-lestari', name: 'Dewi Lestari', email: 'dewi-lestari@chipapp.demo', avatarColor: avatarColors.purple, online: true },
+  { id: 'demo-rudi-hartono', name: 'Rudi Hartono', email: 'rudi-hartono@chipapp.demo', avatarColor: avatarColors.orange, online: false },
+];

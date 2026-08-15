@@ -28,7 +28,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://ganti-dengan-tunnel-anda.trycloudflare.com"
+        "EXPO_PUBLIC_API_URL": "https://chiapp.chiperx.cyou"
       }
     },
     "production": {

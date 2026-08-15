@@ -13,6 +13,7 @@ import { haptics } from '../utils/haptics';
 import LoginScreen from '../screens/LoginScreen';
 import ChatsScreen from '../screens/ChatsScreen';
 import ChatRoomScreen from '../screens/ChatRoomScreen';
+import NewChatScreen from '../screens/NewChatScreen';
 import StatusScreen from '../screens/StatusScreen';
 import CallsScreen from '../screens/CallsScreen';
 import CommunitiesScreen from '../screens/CommunitiesScreen';
@@ -133,6 +134,11 @@ export const RootNavigator: React.FC = () => {
             <Stack.Screen
               name="ChatRoom"
               component={ChatRoomScreen}
+              options={{ animation: 'slide_from_right' }}
+            />
+            <Stack.Screen
+              name="NewChat"
+              component={NewChatScreen}
               options={{ animation: 'slide_from_right' }}
             />
             <Stack.Screen

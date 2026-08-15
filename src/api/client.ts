@@ -5,6 +5,16 @@ export interface ApiError extends Error {
   details?: string;
 }
 
+export interface RemoteUser {
+  id: string;
+  name: string;
+  email: string;
+  picture: string | null;
+  avatarColor: string;
+  online: boolean;
+  lastSeen?: number;
+}
+
 const buildUrl = (path: string) => (path.startsWith('http') ? path : `${API_BASE_URL}${path}`);
 
 /**
@@ -51,3 +61,13 @@ export const api = {
   post: <T>(path: string, body?: unknown, token?: string | null) =>
     request<T>(path, { method: 'POST', body: body ? JSON.stringify(body) : undefined, token }),
 };
+
+export const listUsers = (token: string) =>
+  api.get<{ status: string; users: RemoteUser[] }>('/api/users', token);
+
+export const openDirectChat = (token: string, peerId: string) =>
+  api.post<{ status: string; chat: { id: string; peer: RemoteUser; history: unknown[] } }>(
+    '/api/chats/direct',
+    { peerId },
+    token
+  );
