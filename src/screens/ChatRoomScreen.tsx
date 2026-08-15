@@ -151,7 +151,7 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
   if (!chat) {
     return (
       <View style={[styles.flex, styles.center, { backgroundColor: colors.systemBackground }]}>
-        <Text style={[typography.body, { color: colors.secondaryLabel }]}>Chat unavailable</Text>
+        <Text style={[typography.body, { color: colors.secondaryLabel }]}>{t('chatUnavailable')}</Text>
       </View>
     );
   }
@@ -172,7 +172,7 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
             onPress={() => navigation.goBack()}
             hitSlop={12}
             accessibilityRole="button"
-            accessibilityLabel="Back"
+            accessibilityLabel={t('back')}
             style={styles.back}
           >
             <Ionicons name="chevron-back" size={30} color={colors.accent} />
@@ -291,7 +291,7 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
             }}
             hitSlop={8}
             accessibilityRole="button"
-            accessibilityLabel="Attach"
+            accessibilityLabel={t('attach')}
           >
             <Ionicons name="add-circle-outline" size={30} color={colors.accent} />
           </Pressable>
@@ -312,7 +312,7 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
             <Pressable
               hitSlop={6}
               accessibilityRole="button"
-              accessibilityLabel="Stickers"
+              accessibilityLabel={t('stickers')}
               onPress={() => {
                 haptics.selection();
                 setStickerOpen(true);
@@ -324,7 +324,7 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
 
           <View style={styles.sendSlot}>
             <Animated.View style={[styles.sendAbs, micStyle]} pointerEvents={hasDraft ? 'none' : 'auto'}>
-              <Pressable hitSlop={8} accessibilityRole="button" accessibilityLabel="Record voice message" onPress={haptics.light}>
+              <Pressable hitSlop={8} accessibilityRole="button" accessibilityLabel={t('recordVoice')} onPress={haptics.light}>
                 <Ionicons name="mic-outline" size={26} color={colors.accent} />
               </Pressable>
             </Animated.View>
@@ -334,7 +334,7 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
                 onPress={handleSend}
                 hitSlop={8}
                 accessibilityRole="button"
-                accessibilityLabel="Send"
+                accessibilityLabel={t('send')}
                 style={[styles.sendBtn, { backgroundColor: colors.brand }]}
               >
                 <Ionicons name="arrow-up" size={19} color="#FFFFFF" />
@@ -354,7 +354,7 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
           { key: 'location', label: t('location'), icon: 'location-outline', onPress: () => {} },
           { key: 'contact', label: t('contact'), icon: 'person-outline', onPress: () => {} },
           { key: 'poll', label: t('poll'), icon: 'stats-chart-outline', onPress: () => {} },
-          { key: 'sticker', label: 'Sticker', icon: 'happy-outline', onPress: () => setStickerOpen(true) },
+          { key: 'sticker', label: t('sticker'), icon: 'happy-outline', onPress: () => setStickerOpen(true) },
         ]}
       />
 

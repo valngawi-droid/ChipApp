@@ -3,6 +3,10 @@
 An iOS-fidelity instant messenger built with **Expo / React Native**, a **Node + Socket.io**
 backend, Google OAuth verification, and a ten-language localization engine with RTL support.
 
+**Bahasa Indonesia is the default language.** The app launches in Indonesian regardless of
+device locale; users can switch to any of the other nine languages — or opt into following
+the device via *Bawaan Sistem* — from Pengaturan → Bahasa Aplikasi.
+
 The UI targets Apple HIG parity: large-title collapsing navigation bars, the SF type ramp,
 grouped table views, physics-based spring animations (Reanimated 4 worklets), swipe-to-reply
 gestures, reaction trays, and adaptive light/dark tokens.
@@ -25,7 +29,7 @@ npm run dev        # backend (:4000) + Expo web (:3000) together
 | `npm run dev` | Backend + web app concurrently |
 | `npm run web` / `ios` / `android` | Individual Expo targets |
 | `npm run backend` | Express + Socket.io server only |
-| `npm test` | Typecheck + backend + render + UI + i18n suites |
+| `npm test` | Typecheck + backend + render + UI + i18n + untranslated suites |
 | `npm run size` | Build-size breakdown |
 | `npm run assets:sounds` / `assets:stickers` | Regenerate bundled media |
 
@@ -85,7 +89,7 @@ cloudflared tunnel run --token $CLOUDFLARE_TUNNEL_TOKEN
 | Status | Circular gradient rings, progress bars, tap-to-advance, hold-to-pause, reply bar |
 | Communities | Expandable parent → group hierarchy, verified channels |
 | Settings | Grouped tables, safety number, appearance switching, language picker |
-| i18n | 10 locales, device detection, live switching, Arabic RTL |
+| i18n | Indonesian default, 10 locales, live switching, opt-in device detection, Arabic RTL |
 
 ---
 
@@ -101,8 +105,10 @@ cloudflared tunnel run --token $CLOUDFLARE_TUNNEL_TOKEN
 - **ui** (28 checks) — navigates every tab and asserts the emitted DOM carries the exact
   design tokens (`#25D366`, `#007AFF`, `#DCF8C6`, `#EFE7DE`), the 34/17 px type ramp,
   hairline separators, and expected per-screen content
-- **i18n** — key parity across all 10 dictionaries, no empty values, RTL metadata,
-  translations differ from English, plus live switching to Indonesian and Arabic
+- **i18n** — key parity across all 10 dictionaries (107 keys each), no empty values, RTL
+  metadata, translations differ from English, plus live switching to English and Arabic
+- **untranslated sweep** — renders all 7 screens in the default locale and scans all ~145
+  visible strings for leftover English chrome that never went through `t()`
 
 Chrome cannot be installed in this environment, so the harnesses execute the production
 bundle in **jsdom** rather than a real browser. That verifies logic, state, navigation and

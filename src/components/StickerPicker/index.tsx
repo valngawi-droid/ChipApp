@@ -41,7 +41,7 @@ export const StickerPicker: React.FC<Props> = ({ visible, onClose, onSelect }) =
         <View style={[styles.grabber, { backgroundColor: colors.separator }]} />
 
         <View style={styles.headerRow}>
-          <Text style={[typography.headline, { color: colors.label }]}>{pack?.name ?? 'Stickers'}</Text>
+          <Text style={[typography.headline, { color: colors.label }]}>{pack?.name ?? t('stickers')}</Text>
           <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel={t('cancel')}>
             <Ionicons name="close-circle" size={24} color={colors.tertiaryLabel} />
           </Pressable>

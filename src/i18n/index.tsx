@@ -38,7 +38,14 @@ export const translations: Record<LocaleCode, Dictionary> = {
   ru: ru as unknown as Dictionary,
 };
 
-export const LOCALE_ORDER: LocaleCode[] = ['en', 'id', 'es', 'fr', 'de', 'pt', 'ru', 'ar', 'ja', 'zh'];
+/**
+ * Fallback locale when the device language is not one ChipApp ships.
+ * ChipApp is an Indonesia-first product, so Bahasa Indonesia is the default.
+ */
+export const DEFAULT_LOCALE: LocaleCode = 'id';
+
+// Bahasa Indonesia leads the picker; the rest follow by rough user count.
+export const LOCALE_ORDER: LocaleCode[] = ['id', 'en', 'es', 'fr', 'de', 'pt', 'ru', 'ar', 'ja', 'zh'];
 
 export interface LanguageDescriptor {
   code: LocaleCode;
@@ -80,12 +87,24 @@ export const detectDeviceLocale = (): LocaleCode => {
   } catch {
     // Localization is unavailable in some sandboxed web contexts — fall through.
   }
-  return 'en';
+  return DEFAULT_LOCALE;
 };
 
-export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [locale, setLocaleState] = useState<LocaleCode>('en');
-  const [isManual, setIsManual] = useState(false);
+interface ProviderProps {
+  children: React.ReactNode;
+  /**
+   * Start from the device language instead of ChipApp's Indonesian default.
+   * Users can always switch to "Bawaan Sistem" from the language picker.
+   */
+  followDeviceLocale?: boolean;
+}
+
+export const I18nProvider: React.FC<ProviderProps> = ({ children, followDeviceLocale = false }) => {
+  const [locale, setLocaleState] = useState<LocaleCode>(DEFAULT_LOCALE);
+  // ChipApp ships Indonesian-first, so the app does NOT silently follow the
+  // device language on launch. `isManual` starts true to lock in the default;
+  // the user opts into device detection via the language picker.
+  const [isManual, setIsManual] = useState(!followDeviceLocale);
 
   useEffect(() => {
     if (isManual) return;
@@ -122,8 +141,9 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const t = useCallback(
     (key: TranslationKey | string, fallback?: string) => {
       const dict = translations[locale] as unknown as Record<string, string>;
-      const base = translations.en as unknown as Record<string, string>;
-      return dict?.[key] ?? base?.[key] ?? fallback ?? key;
+      const base = translations[DEFAULT_LOCALE] as unknown as Record<string, string>;
+      const en = translations.en as unknown as Record<string, string>;
+      return dict?.[key] ?? base?.[key] ?? en?.[key] ?? fallback ?? key;
     },
     [locale]
   );

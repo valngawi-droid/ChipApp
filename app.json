@@ -23,7 +23,8 @@
         "NSPhotoLibraryUsageDescription": "ChipApp needs photo library access to share media in chats.",
         "NSContactsUsageDescription": "ChipApp needs contacts access to find friends who use ChipApp.",
         "CFBundleAllowMixedLocalizations": true,
-        "UIViewControllerBasedStatusBarAppearance": true
+        "UIViewControllerBasedStatusBarAppearance": true,
+        "CFBundleDevelopmentRegion": "id"
       }
     },
     "android": {
@@ -46,9 +47,23 @@
       "favicon": "./assets/favicon.png",
       "name": "ChipApp"
     },
-    "plugins": ["expo-localization"],
+    "plugins": [
+      "expo-localization"
+    ],
     "extra": {
       "googleClientId": "68960926780-ti5kaoq71pvg7mb54am9q4176nvcee2i.apps.googleusercontent.com"
+    },
+    "locales": {
+      "id": "./assets/loc/id.json",
+      "en": "./assets/loc/en.json",
+      "es": "./assets/loc/es.json",
+      "fr": "./assets/loc/fr.json",
+      "de": "./assets/loc/de.json",
+      "ar": "./assets/loc/ar.json",
+      "ja": "./assets/loc/ja.json",
+      "zh": "./assets/loc/zh.json",
+      "pt": "./assets/loc/pt.json",
+      "ru": "./assets/loc/ru.json"
     }
   }
 }

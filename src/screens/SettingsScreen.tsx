@@ -55,8 +55,8 @@ export const SettingsScreen: React.FC = () => {
 
   const themeLabel: Record<ThemePreference, string> = {
     system: t('systemDefault'),
-    light: 'Light',
-    dark: 'Dark',
+    light: t('light'),
+    dark: t('dark'),
   };
 
   return (
@@ -75,10 +75,10 @@ export const SettingsScreen: React.FC = () => {
             accessibilityRole="button"
             style={({ pressed }) => [styles.profile, { backgroundColor: pressed ? colors.fill : 'transparent' }]}
           >
-            <Avatar name={user?.name ?? 'ChipApp User'} color={colors.brand} size={64} uri={user?.picture} />
+            <Avatar name={user?.name ?? t('defaultUser')} color={colors.brand} size={64} uri={user?.picture} />
             <View style={styles.profileBody}>
               <Text style={[typography.title3, { color: colors.label }]} numberOfLines={1}>
-                {user?.name ?? 'ChipApp User'}
+                {user?.name ?? t('defaultUser')}
               </Text>
               <Text style={[typography.footnote, { color: colors.secondaryLabel }]} numberOfLines={1}>
                 {user?.email ?? '—'}
@@ -116,20 +116,20 @@ export const SettingsScreen: React.FC = () => {
             toggle={{ value: twoStep, onValueChange: (v) => { haptics.selection(); setTwoStep(v); } }}
           />
           <Row
-            title="Read Receipts"
+            title={t('readReceipts')}
             icon="checkmark-done"
             iconColor="#0A84FF"
             toggle={{ value: readReceipts, onValueChange: (v) => { haptics.selection(); setReadReceipts(v); } }}
           />
           <Row
-            title="Security Notifications"
+            title={t('securityNotifications')}
             icon="notifications-circle"
             iconColor="#5856D6"
             toggle={{ value: securityNotifications, onValueChange: (v) => { haptics.selection(); setSecurityNotifications(v); } }}
           />
         </Section>
 
-        <Section header="Safety Number" footer="Compare this code with your contact to verify the session is secure.">
+        <Section header={t('safetyNumber')} footer={t('safetyNumberFooter')}>
           <View style={styles.codeGrid}>
             {code.map((group, i) => (
               <Text key={i} style={[typography.callout, styles.codeGroup, { color: colors.secondaryLabel }]}>
@@ -152,7 +152,7 @@ export const SettingsScreen: React.FC = () => {
             }}
           />
           <Row
-            title="Appearance"
+            title={t('appearance')}
             icon={scheme === 'dark' ? 'moon' : 'sunny'}
             iconColor="#000000"
             value={themeLabel[preference]}
@@ -172,7 +172,7 @@ export const SettingsScreen: React.FC = () => {
           <Row title={t('inviteFriend')} icon="heart" iconColor="#FF2D55" showChevron onPress={haptics.selection} />
         </Section>
 
-        <Section footer={`ChipApp 4.2.0 · Build 4200${'\n'}Made with love`}>
+        <Section footer={`ChipApp 4.2.0 · Build 4200${'\n'}${t('madeWithLove')}`}>
           <Row title={t('signOut')} destructive onPress={confirmSignOut} />
         </Section>
       </Animated.ScrollView>

@@ -200,7 +200,7 @@ export const ChatBubble: React.FC<Props> = ({
                 source={message.stickerSource}
                 style={styles.sticker}
                 resizeMode="contain"
-                accessibilityLabel="Sticker"
+                accessibilityLabel={t('sticker')}
               />
             ) : (
               <Text style={[typography.body, { color: textColor }]}>{message.text}</Text>

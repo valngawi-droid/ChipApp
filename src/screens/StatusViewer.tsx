@@ -139,7 +139,7 @@ export const StatusViewer: React.FC<Props> = ({ status, onClose }) => {
               accessibilityLabel={t('reply')}
             />
           </View>
-          <Pressable hitSlop={8} accessibilityRole="button" accessibilityLabel="Send">
+          <Pressable hitSlop={8} accessibilityRole="button" accessibilityLabel={t('send')}>
             <Ionicons name="send" size={22} color="#FFFFFF" />
           </Pressable>
         </View>

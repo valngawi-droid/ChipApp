@@ -75,7 +75,7 @@ export const CallsScreen: React.FC = () => {
                       { color: colors.label, fontWeight: active ? '600' : '400' },
                     ]}
                   >
-                    {key === 'all' ? 'All' : t('missedCall')}
+                    {key === 'all' ? t('all') : t('missedCall')}
                   </Text>
                 </Pressable>
               );
@@ -90,11 +90,11 @@ export const CallsScreen: React.FC = () => {
           <View style={[styles.linkIcon, { backgroundColor: colors.brand, borderRadius: radius.md }]}>
             <Ionicons name="link" size={20} color="#FFFFFF" />
           </View>
-          <Text style={[typography.body, { color: colors.accent, flex: 1 }]}>Create Call Link</Text>
+          <Text style={[typography.body, { color: colors.accent, flex: 1 }]}>{t('createCallLink')}</Text>
         </Pressable>
 
         <Text style={[typography.footnote, styles.sectionHeader, { color: colors.secondaryLabel, backgroundColor: colors.secondarySystemBackground }]}>
-          {'Recent'.toUpperCase()}
+          {t('recent').toUpperCase()}
         </Text>
 
         {data.map((call, i) => {

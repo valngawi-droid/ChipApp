@@ -44,7 +44,7 @@ export const seedChats: Chat[] = [
       {
         id: 'm1',
         chatId: 'c1',
-        text: 'Messages and calls are end-to-end encrypted. No one outside of this chat can read or listen to them.',
+        text: 'Pesan dan panggilan dienkripsi secara end-to-end. Tidak ada pihak di luar obrolan ini yang dapat membaca atau mendengarkannya.',
         isMe: false,
         timestamp: daysAgo(1),
         status: 'read',
@@ -177,13 +177,13 @@ export const seedChats: Chat[] = [
     muted: false,
     pinned: false,
     unreadCount: 0,
-    lastMessage: 'Thanks for the quick turnaround!',
+    lastMessage: 'Terima kasih atas responsnya yang cepat!',
     timestamp: hoursAgo(6),
     messages: [
       {
         id: 'ac1',
         chatId: 'c4',
-        text: 'Sent over the contract for review.',
+        text: 'Kontraknya sudah saya kirim untuk ditinjau.',
         isMe: false,
         timestamp: hoursAgo(7),
         status: 'read',
@@ -192,7 +192,7 @@ export const seedChats: Chat[] = [
       {
         id: 'ac2',
         chatId: 'c4',
-        text: 'Got it — signing this afternoon.',
+        text: 'Sudah diterima — akan saya tanda tangani sore ini.',
         isMe: true,
         timestamp: hoursAgo(6.5),
         status: 'read',
@@ -201,7 +201,7 @@ export const seedChats: Chat[] = [
       {
         id: 'ac3',
         chatId: 'c4',
-        text: 'Thanks for the quick turnaround!',
+        text: 'Terima kasih atas responsnya yang cepat!',
         isMe: false,
         timestamp: hoursAgo(6),
         status: 'read',
@@ -273,13 +273,13 @@ export const seedChats: Chat[] = [
     muted: false,
     pinned: false,
     unreadCount: 0,
-    lastMessage: 'You: Deployed to staging ✅',
+    lastMessage: 'Anda: Sudah dideploy ke staging ✅',
     timestamp: daysAgo(3),
     messages: [
       {
         id: 'ds1',
         chatId: 'c7',
-        text: 'Deployed to staging ✅',
+        text: 'Sudah dideploy ke staging ✅',
         isMe: true,
         timestamp: daysAgo(3),
         status: 'read',
@@ -316,7 +316,7 @@ export const seedStatuses: StatusUpdate[] = [
     avatarColor: avatarColors.indigo,
     viewed: false,
     timestamp: hoursAgo(1),
-    frames: [{ id: 's2f1', caption: 'Shipping v4.2 today 🚀', gradient: ['#5856D6', '#00C7BE'], durationMs: 5000 }],
+    frames: [{ id: 's2f1', caption: 'Rilis v4.2 hari ini 🚀', gradient: ['#5856D6', '#00C7BE'], durationMs: 5000 }],
   },
   {
     id: 's3',
@@ -324,7 +324,7 @@ export const seedStatuses: StatusUpdate[] = [
     avatarColor: avatarColors.blue,
     viewed: true,
     timestamp: hoursAgo(8),
-    frames: [{ id: 's3f1', caption: 'Morning run, 10K done', gradient: ['#007AFF', '#34C759'], durationMs: 5000 }],
+    frames: [{ id: 's3f1', caption: 'Lari pagi, 10K selesai', gradient: ['#007AFF', '#34C759'], durationMs: 5000 }],
   },
   {
     id: 's4',
@@ -339,30 +339,30 @@ export const seedStatuses: StatusUpdate[] = [
 export const seedCommunities: Community[] = [
   {
     id: 'cm1',
-    name: 'Neighbourhood Hub',
+    name: 'Warga RW 08',
     avatarColor: avatarColors.green,
-    description: 'RW 08 — announcements, security, and events.',
+    description: 'RW 08 — pengumuman, keamanan, dan acara.',
     groups: [
-      { id: 'cm1g1', name: 'Announcements', unread: 3, lastMessage: 'Kerja bakti Minggu pagi' },
-      { id: 'cm1g2', name: 'Security Watch', unread: 0, lastMessage: 'Jadwal ronda diperbarui' },
-      { id: 'cm1g3', name: 'Marketplace', unread: 7, lastMessage: 'Dijual sepeda anak' },
+      { id: 'cm1g1', name: 'Pengumuman', unread: 3, lastMessage: 'Kerja bakti Minggu pagi' },
+      { id: 'cm1g2', name: 'Ronda Keamanan', unread: 0, lastMessage: 'Jadwal ronda diperbarui' },
+      { id: 'cm1g3', name: 'Jual Beli', unread: 7, lastMessage: 'Dijual sepeda anak' },
     ],
   },
   {
     id: 'cm2',
     name: 'ChipApp Builders',
     avatarColor: avatarColors.blue,
-    description: 'Engineers shipping the ChipApp platform.',
+    description: 'Tim teknis yang membangun platform ChipApp.',
     groups: [
-      { id: 'cm2g1', name: 'Announcements', unread: 1, lastMessage: 'Release 4.2.0 is live' },
-      { id: 'cm2g2', name: 'iOS Guild', unread: 0, lastMessage: 'Reanimated 4 migration notes' },
-      { id: 'cm2g3', name: 'Backend', unread: 2, lastMessage: 'Socket cluster scaling' },
+      { id: 'cm2g1', name: 'Pengumuman', unread: 1, lastMessage: 'Rilis 4.2.0 sudah tayang' },
+      { id: 'cm2g2', name: 'Tim iOS', unread: 0, lastMessage: 'Catatan migrasi Reanimated 4' },
+      { id: 'cm2g3', name: 'Backend', unread: 2, lastMessage: 'Penskalaan cluster socket' },
     ],
   },
 ];
 
 export const seedChannels: Channel[] = [
-  { id: 'ch1', name: 'ChipApp', avatarColor: avatarColors.green, verified: true, followers: 1_284_000, latest: 'Version 4.2 brings faster voice notes.', timestamp: hoursAgo(4) },
-  { id: 'ch2', name: 'Tech Daily', avatarColor: avatarColors.blue, verified: true, followers: 892_400, latest: 'Apple announces new HIG guidance.', timestamp: hoursAgo(11) },
+  { id: 'ch1', name: 'ChipApp', avatarColor: avatarColors.green, verified: true, followers: 1_284_000, latest: 'Versi 4.2 menghadirkan pesan suara yang lebih cepat.', timestamp: hoursAgo(4) },
+  { id: 'ch2', name: 'Tech Daily', avatarColor: avatarColors.blue, verified: true, followers: 892_400, latest: 'Apple mengumumkan panduan HIG terbaru.', timestamp: hoursAgo(11) },
   { id: 'ch3', name: 'Jakarta Traffic', avatarColor: avatarColors.orange, verified: false, followers: 45_200, latest: 'Tol dalam kota lancar pagi ini.', timestamp: daysAgo(1) },
 ];

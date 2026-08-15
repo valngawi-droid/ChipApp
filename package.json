@@ -50,8 +50,9 @@
     "test:flow": "node scripts/smoke-flow.js",
     "test:ui": "node scripts/audit-ui.js",
     "test:i18n": "node scripts/audit-i18n.js",
-    "test": "npm run typecheck && npm run test:backend && npm run test:smoke && npm run test:flow && npm run test:ui && npm run test:i18n"
+    "test": "npm run typecheck && npm run test:backend && npm run test:smoke && npm run test:flow && npm run test:ui && npm run test:i18n && npm run test:untranslated",
+    "test:untranslated": "node scripts/audit-untranslated.js"
   },
   "private": true,
-  "description": "ChipApp — WhatsApp-for-iOS-parity messenger built with Expo, React Native and Socket.io"
+  "description": "ChipApp \u2014 WhatsApp-for-iOS-parity messenger built with Expo, React Native and Socket.io"
 }

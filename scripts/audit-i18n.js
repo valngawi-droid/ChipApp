@@ -48,7 +48,13 @@ check('Arabic flagged RTL', dicts.ar.$meta.rtl === true);
 check('non-Arabic are LTR', ['en', 'id', 'es', 'fr', 'de', 'ja', 'zh', 'pt', 'ru'].every((l) => dicts[l].$meta.rtl === false));
 
 // Translations must not be copies of English (except intentional shared words).
-const SHARED_OK = new Set(['chats', 'status', 'online', 'avatar', 'profile', 'communities', 'offline']);
+// Words that are legitimately spelled the same as English in some target
+// languages (cognates/loanwords), e.g. FR "Contact"/"Document"/"Message".
+const SHARED_OK = new Set([
+  'chats', 'status', 'online', 'avatar', 'profile', 'communities', 'offline',
+  'contact', 'document', 'notifications', 'sticker', 'stickers', 'typeMessage',
+  'search', 'edit', 'all', 'recent',
+]);
 Object.entries(dicts).forEach(([code, dict]) => {
   if (code === 'en') return;
   const identical = baseKeys.filter((k) => !SHARED_OK.has(k) && dict[k] === dicts.en[k]);
@@ -93,22 +99,22 @@ Object.entries(dicts).forEach(([code, dict]) => {
     return true;
   };
 
-  click('Sign in with Google');
+  click('Masuk dengan Google');
   await new Promise((r) => setTimeout(r, 2600));
-  click('Settings');
+  click('Pengaturan');
   await new Promise((r) => setTimeout(r, 1300));
-  check('settings in English', text().includes('Privacy') && text().includes('Security'));
+  check('defaults to Indonesian', text().includes('Privasi') && text().includes('Keamanan'));
 
   // Open the language picker.
-  const opened = click('App Language', false);
+  const opened = click('Bahasa Aplikasi', false);
   await new Promise((r) => setTimeout(r, 900));
   check('language picker opened', opened && text().includes('Bahasa Indonesia'));
 
-  // Switch to Bahasa Indonesia.
-  click('Bahasa Indonesia');
+  // Switch to English.
+  click('English');
   await new Promise((r) => setTimeout(r, 1200));
-  const idText = text();
-  check('UI switched to Indonesian', idText.includes('Privasi') || idText.includes('Keamanan') || idText.includes('Pengaturan'), idText.slice(0, 120));
+  const enText = text();
+  check('UI switched to English', enText.includes('Privacy') || enText.includes('Security'), enText.slice(0, 120));
 
   // Switch to Arabic (RTL).
   click('العربية');

@@ -161,7 +161,7 @@ export const ChatsScreen: React.FC = () => {
           <View style={styles.empty}>
             <Ionicons name="chatbubbles-outline" size={44} color={colors.tertiaryLabel} />
             <Text style={[typography.subheadline, { color: colors.secondaryLabel }]}>
-              {t('search')} — no results
+              {t('noResults')}
             </Text>
           </View>
         ) : (
@@ -200,13 +200,13 @@ export const ChatsScreen: React.FC = () => {
             ? [
                 {
                   key: 'pin',
-                  label: sheetChat.pinned ? 'Unpin Chat' : 'Pin Chat',
+                  label: sheetChat.pinned ? t('unpinChat') : t('pinChat'),
                   icon: 'pin-outline',
                   onPress: () => togglePinned(sheetChat.id),
                 },
                 {
                   key: 'mute',
-                  label: sheetChat.muted ? 'Unmute' : 'Mute',
+                  label: sheetChat.muted ? t('unmuteChat') : t('muteChat'),
                   icon: 'volume-mute-outline',
                   onPress: () => toggleMuted(sheetChat.id),
                 },

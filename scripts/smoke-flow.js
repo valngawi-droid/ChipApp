@@ -51,14 +51,14 @@ const clickByText = (window, needle) => {
   const step = (label) => console.log(`[${label}] ${JSON.stringify((root.textContent || '').slice(0, 260))}`);
   step('login');
 
-  const clicked = clickByText(window, 'Sign in with Google');
+  const clicked = clickByText(window, 'Masuk dengan Google');
   console.log(`clicked sign-in: ${clicked}`);
   await new Promise((r) => setTimeout(r, 3500));
   step('after-auth');
 
   const text = root.textContent || '';
   const checks = {
-    'tab bar present': /Chats/.test(text) && /Settings/.test(text) && /Communities/.test(text),
+    'tab bar present': /Obrolan/.test(text) && /Pengaturan/.test(text) && /Komunitas/.test(text),
     'chat list rendered': /Nadia Pratiwi/.test(text),
     'unread/preview content': /Design Team|Mom/.test(text),
   };

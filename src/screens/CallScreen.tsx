@@ -127,7 +127,7 @@ export const CallScreen: React.FC<Props> = ({ route, navigation }) => {
               />
               <ControlButton
                 icon="keypad"
-                label="keypad"
+                label={t('keypad')}
                 onPress={haptics.selection}
               />
               <ControlButton
@@ -150,14 +150,14 @@ export const CallScreen: React.FC<Props> = ({ route, navigation }) => {
                   setVideoOn((v) => !v);
                 }}
               />
-              <ControlButton icon="person-add" label="add" onPress={haptics.selection} />
-              <ControlButton icon="chatbubble" label="chat" onPress={haptics.selection} />
+              <ControlButton icon="person-add" label={t('addPerson')} onPress={haptics.selection} />
+              <ControlButton icon="chatbubble" label={t('chatAction')} onPress={haptics.selection} />
             </View>
 
             <Pressable
               onPress={hangUp}
               accessibilityRole="button"
-              accessibilityLabel="End call"
+              accessibilityLabel={t('endCall')}
               style={({ pressed }) => [
                 styles.endBtn,
                 { backgroundColor: colors.destructive, opacity: pressed ? 0.8 : 1 },
