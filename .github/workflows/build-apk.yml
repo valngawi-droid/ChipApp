@@ -1,0 +1,87 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: 'Backend URL baked into the APK'
+        required: false
+        default: 'https://chiapp.chiperx.cyou'
+  push:
+    branches:
+      - arena/01a00409-chipapp
+    paths-ignore:
+      - '**.md'
+      - 'backend/**'
+      - 'scripts/test-*.js'
+      - 'scripts/audit-*.js'
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: |
+            platform-tools
+            platforms;android-36
+            build-tools;36.0.0
+            ndk;27.1.12297006
+            cmake;3.22.1
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate signing keystore
+        env:
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD || 'chipapp_ci_password' }}
+        run: |
+          keytool -genkeypair -v \
+            -keystore chipapp-ci.keystore \
+            -alias chipapp \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "$KS_PASS" -keypass "$KS_PASS" \
+            -dname "CN=ChipApp, OU=CI, O=ChipApp, L=Jakarta, S=DKI, C=ID"
+
+      - name: Expo prebuild + configure signing
+        env:
+          EXPO_PUBLIC_API_URL: ${{ inputs.api_url || 'https://chiapp.chiperx.cyou' }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD || 'chipapp_ci_password' }}
+        run: |
+          chmod +x scripts/ci-prebuild.sh
+          bash scripts/ci-prebuild.sh
+
+      - name: Build release APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Rename & report
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk chipapp.apk
+          ls -lh chipapp.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chipapp-apk
+          path: chipapp.apk
+          retention-days: 30
