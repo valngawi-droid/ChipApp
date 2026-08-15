@@ -45,7 +45,13 @@
     "web": {
       "bundler": "metro",
       "favicon": "./assets/favicon.png",
-      "name": "ChipApp"
+      "name": "ChipApp",
+      "shortName": "ChipApp",
+      "themeColor": "#25D366",
+      "backgroundColor": "#ffffff",
+      "lang": "id",
+      "dir": "ltr",
+      "output": "single"
     },
     "plugins": [
       "expo-localization"

@@ -1,0 +1,12 @@
+[build]
+  command = "npm install && npx expo export --platform web --output-dir dist && cp public/manifest.webmanifest dist/ 2>/dev/null; cp public/*.png dist/ 2>/dev/null; true"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  EXPO_PUBLIC_API_URL = ""
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

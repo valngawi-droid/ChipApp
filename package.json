@@ -58,7 +58,10 @@
     "test": "npm run typecheck && npm run test:backend && npm run test:smoke && npm run test:flow && npm run test:ui && npm run test:i18n && npm run test:untranslated",
     "test:untranslated": "node scripts/audit-untranslated.js",
     "apk:local": "bash scripts/build-apk-local.sh",
-    "apk:eas": "eas build --platform android --profile apk"
+    "apk:eas": "eas build --platform android --profile apk",
+    "web:build": "bash scripts/build-web.sh",
+    "web:serve": "node scripts/serve-web.js",
+    "deploy:web": "bash scripts/build-web.sh && node scripts/serve-web.js"
   },
   "private": true,
   "description": "ChipApp — WhatsApp-for-iOS-parity messenger built with Expo, React Native and Socket.io"

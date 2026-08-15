@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npx expo export --platform web --output-dir dist && cp public/manifest.webmanifest dist/ 2>/dev/null; cp public/*.png dist/ 2>/dev/null; true",
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "framework": null
+}
