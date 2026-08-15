@@ -45,7 +45,7 @@ const directId = (a, b) => [a, b].sort().join('::');
 
   const health = await (await fetch(`${BASE}/api/health`)).json();
   check('health ok', health.status === 'ok' && health.service === 'chipapp-backend', JSON.stringify(health));
-  check('health reports version', health.version === '4.3.0');
+  check('health reports version', health.version === '4.4.0');
 
   const auth = await signIn('Test User');
   check('demo auth 200', auth.status === 'success');
@@ -141,6 +141,18 @@ const directId = (a, b) => [a, b].sort().join('::');
   b.emit('react', { room, messageId: got ? got.id : 'm-1', emoji: '👍' });
   const reacted = await Promise.race([reaction, new Promise((r) => setTimeout(() => r(null), 2000))]);
   check('reaction broadcast', reacted && reacted.emoji === '👍' && reacted.reactions['👍'].includes(peer.user.id), JSON.stringify(reacted));
+
+  // Edit message (author only).
+  const edited = new Promise((res) => b.on('message_edited', res));
+  a.emit('edit_message', { room, messageId: 'm-1', text: 'hello edited' });
+  const editEvt = await Promise.race([edited, new Promise((r) => setTimeout(() => r(null), 1500))]);
+  check('edit broadcast', editEvt && editEvt.text === 'hello edited' && !!editEvt.editedAt, JSON.stringify(editEvt));
+
+  // Delete for everyone.
+  const deleted = new Promise((res) => b.on('message_deleted', res));
+  a.emit('delete_message', { room, messageId: 'm-1', forEveryone: true });
+  const delEvt = await Promise.race([deleted, new Promise((r) => setTimeout(() => r(null), 1500))]);
+  check('delete for everyone broadcast', delEvt && delEvt.forEveryone === true, JSON.stringify(delEvt));
 
   // Typing relay.
   const typing = new Promise((res) => b.on('peer_typing', res));

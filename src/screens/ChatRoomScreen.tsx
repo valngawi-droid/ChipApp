@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -9,6 +10,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -26,6 +28,8 @@ import IOSActionSheet from '../components/iOSActionSheet';
 import StickerPicker from '../components/StickerPicker';
 import type { RootStackParamList } from '../navigation/types';
 import {
+  emitDeleteMessage,
+  emitEditMessage,
   emitReadReceipt,
   emitReaction,
   emitTyping,
@@ -49,6 +53,11 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
   const setActiveChat = useAppStore((s) => s.setActiveChat);
   const markChatRead = useAppStore((s) => s.markChatRead);
   const typingChatIds = useAppStore((s) => s.typingChatIds);
+  const editMessage = useAppStore((s) => s.editMessage);
+  const deleteMessageForMe = useAppStore((s) => s.deleteMessageForMe);
+  const markMessageDeleted = useAppStore((s) => s.markMessageDeleted);
+  const clearChat = useAppStore((s) => s.clearChat);
+  const peers = useAppStore((s) => s.peers);
   const user = useAppStore((s) => s.user);
 
   const [draft, setDraft] = useState('');
@@ -56,6 +65,10 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
   const [attachOpen, setAttachOpen] = useState(false);
   const [stickerOpen, setStickerOpen] = useState(false);
   const [reactionTarget, setReactionTarget] = useState<{ message: Message; y: number } | null>(null);
+  const [actionTarget, setActionTarget] = useState<Message | null>(null);
+  const [editing, setEditing] = useState<Message | null>(null);
+  const [query, setQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const listRef = useRef<ScrollView>(null);
   const sendScale = useSharedValue(0);
@@ -112,6 +125,16 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
     const text = draft.trim();
     if (!text || !chat) return;
 
+    if (editing) {
+      editMessage(chat.id, editing.id, text);
+      emitEditMessage(chat.id, editing.id, text);
+      setDraft('');
+      setEditing(null);
+      setReplyTo(null);
+      signalTyping(false);
+      return;
+    }
+
     const id = `local-${Date.now()}`;
     const timestamp = new Date().toISOString();
 
@@ -139,7 +162,7 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
     signalTyping(false);
 
     requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
-  }, [draft, chat, replyTo, sendMessage, updateMessageStatus, t, signalTyping]);
+  }, [draft, chat, replyTo, editing, sendMessage, updateMessageStatus, t, signalTyping, editMessage]);
 
   const handleSendSticker = useCallback(
     (packId: string, stickerId: string, source: number) => {
@@ -169,17 +192,52 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
     [chat, sendMessage, updateMessageStatus]
   );
 
+  const searchHits = useMemo(() => {
+    if (!searchOpen || !query.trim() || !chat) return new Set<string>();
+    const q = query.trim().toLowerCase();
+    return new Set(chat.messages.filter((m) => m.text?.toLowerCase().includes(q)).map((m) => m.id));
+  }, [chat, query, searchOpen]);
+
   const grouped = useMemo(() => {
     if (!chat) return [];
     const out: { key: string; day: string; items: Message[] }[] = [];
-    chat.messages.forEach((m) => {
-      const day = formatDaySeparator(m.timestamp, locale, { today: t('today'), yesterday: t('yesterday') });
-      const last = out[out.length - 1];
-      if (last && last.day === day) last.items.push(m);
-      else out.push({ key: `${day}-${m.id}`, day, items: [m] });
-    });
+    chat.messages
+      .filter((m) => (searchOpen ? searchHits.has(m.id) : true))
+      .forEach((m) => {
+        const day = formatDaySeparator(m.timestamp, locale, { today: t('today'), yesterday: t('yesterday') });
+        const last = out[out.length - 1];
+        if (last && last.day === day) last.items.push(m);
+        else out.push({ key: `${day}-${m.id}`, day, items: [m] });
+      });
     return out;
-  }, [chat, locale, t]);
+  }, [chat, locale, t, searchOpen, searchHits]);
+
+  const confirmDelete = (m: Message, forEveryone: boolean) => {
+    if (!chat) return;
+    if (forEveryone) {
+      markMessageDeleted(chat.id, m.id);
+      emitDeleteMessage(chat.id, m.id, true);
+    } else {
+      deleteMessageForMe(chat.id, m.id);
+      emitDeleteMessage(chat.id, m.id, false);
+    }
+  };
+
+  const startEdit = (m: Message) => {
+    setEditing(m);
+    setDraft(m.text);
+    setActionTarget(null);
+  };
+
+  const saveEdit = () => {
+    if (!editing || !chat) return;
+    const text = draft.trim();
+    if (!text) return;
+    editMessage(chat.id, editing.id, text);
+    emitEditMessage(chat.id, editing.id, text);
+    setDraft('');
+    setEditing(null);
+  };
 
   if (!chat) {
     return (
@@ -190,6 +248,10 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
   }
 
   const isTyping = typingChatIds.includes(chat.id);
+  const peer = chat.peerId ? peers.find((p) => p.id === chat.peerId) : undefined;
+  const lastSeenLabel = peer?.lastSeen
+    ? `${t('lastSeen')} ${new Date(peer.lastSeen).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}`
+    : t('tapForContactInfo');
 
   return (
     <View style={[styles.flex, { backgroundColor: colors.chatWallpaper }]}>
@@ -217,13 +279,24 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
               <Text numberOfLines={1} style={[typography.headline, { color: colors.label, fontSize: 16 }]}>
                 {chat.name}
               </Text>
-              <Text numberOfLines={1} style={[typography.caption2, { color: isTyping ? colors.brand : colors.secondaryLabel }]}>
-                {isTyping ? t('typing') : chat.online ? t('online') : t('tapForContactInfo')}
+              <Text numberOfLines={1} style={[typography.caption2, { color: isTyping ? colors.brand : chat.online ? colors.brand : colors.secondaryLabel }]}>
+                {isTyping ? t('typing') : chat.online ? t('online') : lastSeenLabel}
               </Text>
             </View>
           </Pressable>
 
           <View style={styles.headerActions}>
+            <Pressable
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel={t('searchInChat')}
+              onPress={() => {
+                setSearchOpen((v) => !v);
+                setQuery('');
+              }}
+            >
+              <Ionicons name="search" size={22} color={colors.accent} />
+            </Pressable>
             <Pressable
               hitSlop={10}
               accessibilityRole="button"
@@ -243,6 +316,23 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
           </View>
         </View>
       </View>
+
+      {searchOpen && (
+        <View style={[styles.searchBar, { backgroundColor: colors.secondarySystemBackground, borderBottomColor: colors.separator }]}>
+          <Ionicons name="search" size={16} color={colors.secondaryLabel} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder={t('searchInChat')}
+            placeholderTextColor={colors.placeholder}
+            style={[typography.body, { flex: 1, color: colors.label, padding: 0 }]}
+            autoFocus
+          />
+          <Pressable hitSlop={8} onPress={() => { setSearchOpen(false); setQuery(''); }} accessibilityLabel={t('cancel')}>
+            <Ionicons name="close-circle" size={18} color={colors.tertiaryLabel} />
+          </Pressable>
+        </View>
+      )}
 
       <KeyboardAvoidingView
         style={styles.flex}
@@ -276,13 +366,45 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
                     showTail={!next || next.isMe !== message.isMe || next.kind === 'system'}
                     showAuthor={chat.isGroup && (!prev || prev.isMe !== message.isMe || prev.authorName !== message.authorName)}
                     onReply={(m) => setReplyTo(m)}
-                    onLongPress={(m, y) => setReactionTarget({ message: m, y })}
+                    onLongPress={(m, y) => {
+                      setActionTarget(m);
+                      setReactionTarget({ message: m, y });
+                    }}
                   />
                 );
               })}
             </View>
           ))}
         </ScrollView>
+
+        {searchOpen && grouped.length === 0 && (
+          <View style={styles.emptySearch}>
+            <Text style={[typography.subheadline, { color: colors.secondaryLabel }]}>{t('noResults')}</Text>
+          </View>
+        )}
+
+        {/* Editing banner */}
+        {!!editing && (
+          <Animated.View
+            entering={FadeIn.duration(120)}
+            exiting={FadeOut.duration(100)}
+            style={[styles.replyPreview, { backgroundColor: colors.secondarySystemBackground, borderTopColor: colors.separator }]}
+          >
+            <Ionicons name="create-outline" size={18} color={colors.brand} />
+            <View style={styles.flex}>
+              <Text style={[typography.caption1, { color: colors.brand, fontWeight: '600' }]}>{t('edit')}</Text>
+              <Text numberOfLines={1} style={[typography.footnote, { color: colors.secondaryLabel }]}>{editing.text}</Text>
+            </View>
+            <Pressable
+              hitSlop={10}
+              onPress={() => { setEditing(null); setDraft(''); }}
+              accessibilityRole="button"
+              accessibilityLabel={t('cancel')}
+            >
+              <Ionicons name="close-circle" size={22} color={colors.tertiaryLabel} />
+            </Pressable>
+          </Animated.View>
+        )}
 
         {/* Reply preview */}
         {!!replyTo && (
@@ -388,6 +510,19 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
           { key: 'contact', label: t('contact'), icon: 'person-outline', onPress: () => {} },
           { key: 'poll', label: t('poll'), icon: 'stats-chart-outline', onPress: () => {} },
           { key: 'sticker', label: t('sticker'), icon: 'happy-outline', onPress: () => setStickerOpen(true) },
+          {
+            key: 'clear',
+            label: t('clearChat'),
+            icon: 'trash-outline',
+            destructive: true,
+            onPress: () =>
+              Platform.OS === 'web'
+                ? clearChat(chat.id)
+                : Alert.alert(t('clearChat'), '', [
+                    { text: t('cancel'), style: 'cancel' },
+                    { text: t('delete'), style: 'destructive', onPress: () => clearChat(chat.id) },
+                  ]),
+          },
         ]}
       />
 
@@ -400,21 +535,93 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
       <ReactionPicker
         visible={!!reactionTarget}
         anchor={reactionTarget ? { x: 0, y: reactionTarget.y } : null}
-        onClose={() => setReactionTarget(null)}
+        onClose={() => { setReactionTarget(null); setActionTarget(null); }}
         onSelect={(emoji) => {
           if (reactionTarget) {
             toggleReaction(chat.id, reactionTarget.message.id, emoji);
-            // Broadcast to peers so the reaction is real-time; the local
-            // optimistic update is applied immediately by toggleReaction.
-            if (reactionTarget.message.id.startsWith('local-')) {
-              // No server id yet; the ack will rename it. For reactions sent
-              // before ack we fall through silently; users can retry after.
-            } else {
+            if (!reactionTarget.message.id.startsWith('local-')) {
               emitReaction(chat.id, reactionTarget.message.id, emoji);
             }
           }
           setReactionTarget(null);
         }}
+      />
+
+      <IOSActionSheet
+        visible={!!actionTarget && !actionTarget.deleted}
+        title={actionTarget?.text}
+        onClose={() => setActionTarget(null)}
+        options={
+          actionTarget
+            ? [
+                {
+                  key: 'reply',
+                  label: t('reply'),
+                  icon: 'arrow-undo-outline',
+                  onPress: () => {
+                    setReplyTo(actionTarget);
+                    setReactionTarget({ message: actionTarget, y: 0 });
+                  },
+                },
+                {
+                  key: 'copy',
+                  label: t('copy'),
+                  icon: 'copy-outline',
+                  onPress: () => {
+                    if (actionTarget.text) void Clipboard.setStringAsync(actionTarget.text);
+                  },
+                },
+                ...(actionTarget.isMe
+                  ? [
+                      {
+                        key: 'edit',
+                        label: t('edit'),
+                        icon: 'create-outline',
+                        onPress: () => startEdit(actionTarget),
+                      },
+                    ]
+                  : []),
+                {
+                  key: 'forward',
+                  label: t('forward'),
+                  icon: 'arrow-redo-outline',
+                  onPress: () => {
+                    if (actionTarget.text) void Clipboard.setStringAsync(actionTarget.text);
+                  },
+                },
+                {
+                  key: 'deleteMe',
+                  label: t('deleteForMe'),
+                  icon: 'trash-outline',
+                  destructive: true,
+                  onPress: () =>
+            Platform.OS === 'web'
+              ? confirmDelete(actionTarget, false)
+              : Alert.alert(t('delete'), '', [
+                  { text: t('cancel'), style: 'cancel' },
+                  { text: t('delete'), style: 'destructive', onPress: () => confirmDelete(actionTarget, false) },
+                ]),
+                },
+                ...(actionTarget.isMe
+                  ? [
+                      {
+                        key: 'deleteAll',
+                        label: t('deleteForEveryone'),
+                        icon: 'trash-bin-outline',
+                        destructive: true,
+                        onPress: () =>
+                          Platform.OS === 'web'
+                            ? confirmDelete(actionTarget, true)
+                            : Alert.alert(t('delete'), '', [
+                                { text: t('cancel'), style: 'cancel' },
+                                { text: t('deleteForEveryone'), style: 'destructive', onPress: () => confirmDelete(actionTarget, true) },
+                              ]),
+                      },
+                    ]
+                  : []),
+              ]
+            : []
+        }
       />
     </View>
   );
@@ -423,6 +630,15 @@ export const ChatRoomScreen: React.FC<Props> = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   center: { alignItems: 'center', justifyContent: 'center' },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  emptySearch: { paddingVertical: 20, alignItems: 'center' },
   header: { borderBottomWidth: StyleSheet.hairlineWidth, zIndex: 5 },
   headerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, gap: 4 },
   back: { paddingEnd: 2 },

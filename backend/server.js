@@ -119,7 +119,7 @@ app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     service: 'chipapp-backend',
-    version: '4.3.0',
+    version: '4.4.0',
     uptimeSec: Math.round(process.uptime()),
     sockets: io.engine.clientsCount,
     users: users.size,
@@ -369,6 +369,35 @@ io.on('connection', (socket) => {
         Object.entries(target.reactions).map(([k, v]) => [k, [...v]])
       ),
     });
+  });
+
+  socket.on('edit_message', ({ room, messageId, text } = {}) => {
+    if (!user || !room || !messageId || typeof text !== 'string') return;
+    const next = text.slice(0, 4000);
+    if (!next.trim()) return;
+    const target = ensureHistory(room).find((m) => m.id === messageId);
+    if (!target || target.author !== user.id) return;
+    target.text = next;
+    target.editedAt = new Date().toISOString();
+    io.to(room).emit('message_edited', {
+      room, messageId, text: next, editedAt: target.editedAt,
+    });
+  });
+
+  socket.on('delete_message', ({ room, messageId, forEveryone } = {}) => {
+    if (!user || !room || !messageId) return;
+    const list = ensureHistory(room);
+    const idx = list.findIndex((m) => m.id === messageId);
+    if (idx === -1) return;
+    if (forEveryone && list[idx].author !== user.id) return;
+    if (forEveryone) {
+      list[idx].deleted = true;
+      list[idx].text = '';
+      io.to(room).emit('message_deleted', { room, messageId, forEveryone: true });
+    } else {
+      list.splice(idx, 1);
+      socket.emit('message_deleted', { room, messageId, forEveryone: false });
+    }
   });
 
   socket.on('disconnect', (reason) => {

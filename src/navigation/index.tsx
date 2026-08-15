@@ -14,6 +14,7 @@ import LoginScreen from '../screens/LoginScreen';
 import ChatsScreen from '../screens/ChatsScreen';
 import ChatRoomScreen from '../screens/ChatRoomScreen';
 import NewChatScreen from '../screens/NewChatScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 import StatusScreen from '../screens/StatusScreen';
 import CallsScreen from '../screens/CallsScreen';
 import CommunitiesScreen from '../screens/CommunitiesScreen';
@@ -139,6 +140,11 @@ export const RootNavigator: React.FC = () => {
             <Stack.Screen
               name="NewChat"
               component={NewChatScreen}
+              options={{ animation: 'slide_from_right' }}
+            />
+            <Stack.Screen
+              name="Profile"
+              component={ProfileScreen}
               options={{ animation: 'slide_from_right' }}
             />
             <Stack.Screen

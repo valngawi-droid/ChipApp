@@ -3,6 +3,8 @@ import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { useTheme, type ThemePreference } from '../theme/ThemeProvider';
 import { useLocalization } from '../i18n';
@@ -15,8 +17,10 @@ import LanguagePicker from '../components/LanguagePicker';
 import IOSActionSheet from '../components/iOSActionSheet';
 import { Row, Section } from '../components/GroupedList';
 import { teardownSocket } from '../api/socket';
+import type { RootStackParamList } from '../navigation/types';
 
 export const SettingsScreen: React.FC = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors, typography, preference, setPreference, scheme } = useTheme();
   const { t, locale, languages, isManual } = useLocalization();
   const insets = useSafeAreaInsets();
@@ -73,7 +77,7 @@ export const SettingsScreen: React.FC = () => {
         {/* Profile card */}
         <Section>
           <Pressable
-            onPress={haptics.selection}
+            onPress={() => navigation.navigate('Profile')}
             accessibilityRole="button"
             style={({ pressed }) => [styles.profile, { backgroundColor: pressed ? colors.fill : 'transparent' }]}
           >

@@ -119,5 +119,15 @@
   "demoNotice": "Mode demo memakai profil contoh. Login Google untuk akun asli.",
   "appearanceSystem": "Ikuti sistem",
   "appearanceLight": "Terang",
-  "appearanceDark": "Gelap"
+  "appearanceDark": "Gelap",
+  "deleteForMe": "Hapus untuk saya",
+  "deleteForEveryone": "Hapus untuk semua",
+  "searchInChat": "Cari di obrolan",
+  "edited": "(diubah)",
+  "messageDeleted": "Pesan ini dihapus",
+  "lastSeen": "Terakhir dilihat",
+  "clearChat": "Bersihkan obrolan",
+  "noMessages": "Belum ada pesan",
+  "save": "Simpan",
+  "block": "Blokir"
 }

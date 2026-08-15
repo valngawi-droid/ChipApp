@@ -17,7 +17,7 @@ import { haptics } from '../../utils/haptics';
 export interface SheetOption {
   key: string;
   label: string;
-  icon?: keyof typeof Ionicons.glyphMap;
+  icon?: string;
   destructive?: boolean;
   onPress: () => void;
 }
@@ -114,7 +114,7 @@ export const IOSActionSheet: React.FC<Props> = ({ visible, title, message, optio
                 </Text>
                 {!!option.icon && (
                   <Ionicons
-                    name={option.icon}
+                    name={option.icon as keyof typeof Ionicons.glyphMap}
                     size={22}
                     color={option.destructive ? colors.destructive : colors.accent}
                   />

@@ -20,6 +20,8 @@ export interface Message {
   timestamp: string;
   status: MessageStatus;
   kind: MessageKind;
+  editedAt?: string;
+  deleted?: boolean;
   /** Voice note length in seconds (kind === 'voice'). */
   durationSec?: number;
   /** Normalised 0..1 amplitude samples for the waveform (kind === 'voice'). */
@@ -133,6 +135,11 @@ interface AppState {
   togglePinned: (chatId: string) => void;
   toggleMuted: (chatId: string) => void;
   deleteChat: (chatId: string) => void;
+  deleteMessageForMe: (chatId: string, messageId: string) => void;
+  markMessageDeleted: (chatId: string, messageId: string) => void;
+  editMessage: (chatId: string, messageId: string, text: string) => void;
+  patchMessageFromServer: (chatId: string, messageId: string, patch: Partial<Message>) => void;
+  clearChat: (chatId: string) => void;
   setTyping: (chatId: string, typing: boolean, peerId?: string) => void;
   markStatusViewed: (statusId: string) => void;
 }
@@ -414,6 +421,57 @@ export const useAppStore = create<AppState>((set, get) => ({
     })),
 
   deleteChat: (chatId) => set((state) => ({ chats: state.chats.filter((c) => c.id !== chatId) })),
+
+  deleteMessageForMe: (chatId, messageId) =>
+    set((state) => ({
+      chats: state.chats.map((chat) =>
+        chat.id !== chatId
+          ? chat
+          : { ...chat, messages: chat.messages.filter((m) => m.id !== messageId) }
+      ),
+    })),
+
+  markMessageDeleted: (chatId, messageId) =>
+    set((state) => ({
+      chats: state.chats.map((chat) =>
+        chat.id !== chatId
+          ? chat
+          : { ...chat, messages: chat.messages.map((m) => (m.id === messageId ? { ...m, deleted: true, text: '' } : m)) }
+      ),
+    })),
+
+  patchMessageFromServer: (chatId, messageId, patch) =>
+    set((state) => ({
+      chats: state.chats.map((chat) =>
+        chat.id !== chatId
+          ? chat
+          : { ...chat, messages: chat.messages.map((m) => (m.id === messageId ? { ...m, ...patch } : m)) }
+      ),
+    })),
+
+  editMessage: (chatId, messageId, text) =>
+    set((state) => ({
+      chats: state.chats.map((chat) => {
+        if (chat.id !== chatId) return chat;
+        return {
+          ...chat,
+          messages: chat.messages.map((m) =>
+            m.id === messageId
+              ? { ...m, text, editedAt: new Date().toISOString(), status: 'sent' }
+              : m
+          ),
+        };
+      }),
+    })),
+
+  clearChat: (chatId) =>
+    set((state) => ({
+      chats: state.chats.map((chat) =>
+        chat.id === chatId
+          ? { ...chat, messages: [], lastMessage: '', unreadCount: 0 }
+          : chat
+      ),
+    })),
 
   setTyping: (chatId, typing, _peerId) =>
     set((state) => ({

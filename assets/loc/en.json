@@ -119,5 +119,15 @@
   "demoNotice": "Demo mode uses a sample profile. Sign in with Google for your real account.",
   "appearanceSystem": "System",
   "appearanceLight": "Light",
-  "appearanceDark": "Dark"
+  "appearanceDark": "Dark",
+  "deleteForMe": "Delete for me",
+  "deleteForEveryone": "Delete for everyone",
+  "searchInChat": "Search in chat",
+  "edited": "(edited)",
+  "messageDeleted": "This message was deleted",
+  "lastSeen": "last seen",
+  "clearChat": "Clear chat",
+  "noMessages": "No messages yet",
+  "save": "Save",
+  "block": "Block"
 }

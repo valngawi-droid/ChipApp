@@ -61,6 +61,8 @@ const RealtimeBridge: React.FC = () => {
   const setPeers = useAppStore((s) => s.setPeers);
   const applyMessageAck = useAppStore((s) => s.applyMessageAck);
   const applyReaction = useAppStore((s) => s.applyReaction);
+  const patchMessageFromServer = useAppStore((s) => s.patchMessageFromServer);
+  const markMessageDeleted = useAppStore((s) => s.markMessageDeleted);
   const activeChatId = useAppStore((s) => s.activeChatId);
   const ensureChatForPeer = useAppStore((s) => s.ensureChatForPeer);
   const logout = useAppStore((s) => s.logout);
@@ -159,6 +161,17 @@ const RealtimeBridge: React.FC = () => {
       );
     };
 
+    const onEdited = (payload: { room: string; messageId: string; text: string; editedAt: string }) => {
+      patchMessageFromServer(payload.room, payload.messageId, {
+        text: payload.text,
+        editedAt: payload.editedAt,
+      });
+    };
+
+    const onDeleted = (payload: { room: string; messageId: string; forEveryone?: boolean }) => {
+      if (payload.forEveryone) markMessageDeleted(payload.room, payload.messageId);
+    };
+
     const onReaction = (payload: {
       room: string;
       messageId: string;
@@ -187,6 +200,8 @@ const RealtimeBridge: React.FC = () => {
     socket.on('message_ack', onAck);
     socket.on('presence', onPresence);
     socket.on('reaction', onReaction);
+    socket.on('message_edited', onEdited);
+    socket.on('message_deleted', onDeleted);
     socket.on('joined', onJoined);
 
     return () => {
@@ -199,6 +214,8 @@ const RealtimeBridge: React.FC = () => {
       socket.off('message_ack', onAck);
       socket.off('presence', onPresence);
       socket.off('reaction', onReaction);
+      socket.off('message_edited', onEdited);
+      socket.off('message_deleted', onDeleted);
       socket.off('joined', onJoined);
     };
   }, [
@@ -212,6 +229,8 @@ const RealtimeBridge: React.FC = () => {
     setPeers,
     applyMessageAck,
     applyReaction,
+    patchMessageFromServer,
+    markMessageDeleted,
     ensureChatForPeer,
     logout,
   ]);

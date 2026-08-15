@@ -12,6 +12,7 @@ export type RootStackParamList = {
   Tabs: NavigatorScreenParams<TabParamList> | undefined;
   ChatRoom: { chatId: string };
   NewChat: undefined;
+  Profile: undefined;
   Call: { name: string; color: string; video: boolean; incoming: boolean };
 };
 

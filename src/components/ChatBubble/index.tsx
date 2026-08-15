@@ -202,8 +202,20 @@ export const ChatBubble: React.FC<Props> = ({
                 resizeMode="contain"
                 accessibilityLabel={t('sticker')}
               />
+            ) : message.deleted ? (
+              <Text style={[typography.body, { color: colors.secondaryLabel, fontStyle: 'italic' }]}>
+                🚫 {t('messageDeleted')}
+              </Text>
             ) : (
-              <Text style={[typography.body, { color: textColor }]}>{message.text}</Text>
+              <Text style={[typography.body, { color: textColor }]} selectable>
+                {message.text}
+                {!!message.editedAt && (
+                  <Text style={[typography.caption2, { color: colors.secondaryLabel }]}>
+                    {'  '}
+                    {t('edited')}
+                  </Text>
+                )}
+              </Text>
             )}
 
             <View style={styles.footer}>

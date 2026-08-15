@@ -62,3 +62,7 @@ export const emitReadReceipt = (room: string, messageId?: string) =>
   socket.emit('read_receipt', { room, messageId });
 export const emitReaction = (room: string, messageId: string, emoji: string) =>
   socket.emit('react', { room, messageId, emoji });
+export const emitEditMessage = (room: string, messageId: string, text: string) =>
+  socket.emit('edit_message', { room, messageId, text });
+export const emitDeleteMessage = (room: string, messageId: string, forEveryone: boolean) =>
+  socket.emit('delete_message', { room, messageId, forEveryone });
