@@ -62,6 +62,20 @@ Full walkthrough — wake-locks, battery optimisation, `tmux`, Cloudflare Tunnel
 and a troubleshooting table — is in **[backend/TERMUX.md](backend/TERMUX.md)**
 (written in Indonesian).
 
+### Building an installable APK
+
+> **APK builds cannot run inside Termux.** Expo SDK 57 targets Android SDK 36
+> while Termux's `aapt2` only supports up to SDK 34, and Google ships no ARM64
+> Android SDK. Build in the cloud or on a desktop instead.
+
+```bash
+npm run apk:eas      # cloud build via EAS (easiest; free account)
+npm run apk:local    # local build on Linux/macOS with JDK 17 + Android SDK
+```
+
+**[PANDUAN.md](PANDUAN.md)** is the complete Indonesian walkthrough covering
+Termux setup, both APK routes, signing, and connecting the app to your server.
+
 ---
 
 ## Architecture

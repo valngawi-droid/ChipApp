@@ -44,3 +44,10 @@ yarn-error.*
 backend/.env
 .env
 .env.local
+
+# Kunci penandatanganan APK — JANGAN pernah masuk ke Git
+*.keystore
+*.jks
+*.p12
+*.p8
+key.properties
