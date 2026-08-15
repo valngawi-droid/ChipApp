@@ -45,7 +45,8 @@ const directId = (a, b) => [a, b].sort().join('::');
 
   const health = await (await fetch(`${BASE}/api/health`)).json();
   check('health ok', health.status === 'ok' && health.service === 'chipapp-backend', JSON.stringify(health));
-  check('health reports version', health.version === '4.4.0');
+  check('health reports version', health.version === '5.0.0');
+  check('health reports storage', health.storage === 'memory');
 
   const auth = await signIn('Test User');
   check('demo auth 200', auth.status === 'success');

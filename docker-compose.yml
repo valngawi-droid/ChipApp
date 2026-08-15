@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-chipapp_root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-chipapp}
+      MYSQL_USER: ${MYSQL_USER:-chipapp}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-chipapp_pass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - chipapp_mysql:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  backend:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      DATABASE_URL: mysql://${MYSQL_USER:-chipapp}:${MYSQL_PASSWORD:-chipapp_pass}@mysql:3306/${MYSQL_DATABASE:-chipapp}
+      JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
+      PORT: "4000"
+      HOST: "0.0.0.0"
+    ports:
+      - "4000:4000"
+
+volumes:
+  chipapp_mysql:

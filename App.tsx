@@ -63,6 +63,7 @@ const RealtimeBridge: React.FC = () => {
   const applyReaction = useAppStore((s) => s.applyReaction);
   const patchMessageFromServer = useAppStore((s) => s.patchMessageFromServer);
   const markMessageDeleted = useAppStore((s) => s.markMessageDeleted);
+  const hydrateRoom = useAppStore((s) => s.hydrateRoom);
   const activeChatId = useAppStore((s) => s.activeChatId);
   const ensureChatForPeer = useAppStore((s) => s.ensureChatForPeer);
   const logout = useAppStore((s) => s.logout);
@@ -182,12 +183,41 @@ const RealtimeBridge: React.FC = () => {
       applyReaction(payload.room, payload.messageId, payload.emoji, payload.userId, payload.userName);
     };
 
-    const onJoined = ({ room }: { room: string; history?: unknown[] }) => {
-      // If this is a new direct room for a known peer, make sure it exists.
+    const onJoined = ({
+      room,
+      history,
+    }: {
+      room: string;
+      history?: {
+        id: string;
+        text: string;
+        author?: string;
+        timestamp: string;
+        kind?: string;
+        deleted?: boolean;
+        editedAt?: string;
+      }[];
+    }) => {
       if (room.includes('::')) {
         const [a, b] = room.split('::');
         const peerId = a === user?.id ? b : b === user?.id ? a : null;
         if (peerId) ensureChatForPeer(peerId);
+      }
+      if (Array.isArray(history) && history.length) {
+        hydrateRoom(
+          room,
+          history.map((m) => ({
+            id: m.id,
+            text: m.deleted ? '' : m.text,
+            timestamp: m.timestamp,
+            kind: (m.kind as Message['kind']) ?? 'text',
+            isMe: m.author === user?.id,
+            status: (m.author === user?.id ? 'read' : 'delivered') as Message['status'],
+            authorId: m.author,
+            deleted: m.deleted,
+            editedAt: m.editedAt,
+          }))
+        );
       }
     };
 
@@ -231,6 +261,7 @@ const RealtimeBridge: React.FC = () => {
     applyReaction,
     patchMessageFromServer,
     markMessageDeleted,
+    hydrateRoom,
     ensureChatForPeer,
     logout,
   ]);

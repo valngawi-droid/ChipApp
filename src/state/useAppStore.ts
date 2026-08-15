@@ -122,6 +122,7 @@ interface AppState {
   setPeers: (peers: RemoteUser[]) => void;
   upsertDirectChat: (peer: RemoteUser) => string;
   ensureChatForPeer: (peerId: string) => string | null;
+  hydrateRoom: (roomId: string, messages: Omit<Message, 'chatId'>[]) => void;
 
   setActiveChat: (chatId: string | null) => void;
   sendMessage: (chatId: string, message: Omit<Message, 'chatId'>) => void;
@@ -260,6 +261,32 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (!peer) return null;
     return get().upsertDirectChat(peer);
   },
+
+  hydrateRoom: (roomId, messages) =>
+    set((state) => {
+      const existing = state.chats.find((c) => c.id === roomId);
+      if (!existing) return state;
+      // Merge server history without duplicating optimistic messages.
+      const byId = new Map<string, Message>();
+      for (const m of existing.messages) byId.set(m.id, m);
+      for (const m of messages) {
+        const full: Message = {
+          ...m,
+          chatId: roomId,
+          isMe: m.authorId === state.user?.id,
+          status: m.authorId === state.user?.id ? 'read' : 'delivered',
+        };
+        if (!byId.has(full.id)) byId.set(full.id, full);
+      }
+      const merged = [...byId.values()].sort(
+        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+      return {
+        chats: state.chats.map((c) =>
+          c.id === roomId ? { ...c, messages: merged } : c
+        ),
+      };
+    }),
 
   setActiveChat: (activeChatId) => set({ activeChatId }),
 
