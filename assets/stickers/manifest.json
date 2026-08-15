@@ -1,0 +1,138 @@
+{
+  "version": "4.2.0",
+  "packs": [
+    {
+      "id": "emotions",
+      "name": "ChipApp Emotions",
+      "publisher": "ChipApp",
+      "stickers": [
+        {
+          "id": "grinning",
+          "file": "emotions/grinning.svg"
+        },
+        {
+          "id": "smiling",
+          "file": "emotions/smiling.svg"
+        },
+        {
+          "id": "in-love",
+          "file": "emotions/in-love.svg"
+        },
+        {
+          "id": "winking",
+          "file": "emotions/winking.svg"
+        },
+        {
+          "id": "surprised",
+          "file": "emotions/surprised.svg"
+        },
+        {
+          "id": "sad",
+          "file": "emotions/sad.svg"
+        },
+        {
+          "id": "neutral",
+          "file": "emotions/neutral.svg"
+        },
+        {
+          "id": "sleepy",
+          "file": "emotions/sleepy.svg"
+        },
+        {
+          "id": "cool",
+          "file": "emotions/cool.svg"
+        },
+        {
+          "id": "blush",
+          "file": "emotions/blush.svg"
+        }
+      ]
+    },
+    {
+      "id": "hands",
+      "name": "ChipApp Hands",
+      "publisher": "ChipApp",
+      "stickers": [
+        {
+          "id": "thumbs-up",
+          "file": "hands/thumbs-up.svg"
+        },
+        {
+          "id": "thumbs-down",
+          "file": "hands/thumbs-down.svg"
+        },
+        {
+          "id": "ok-hand",
+          "file": "hands/ok-hand.svg"
+        },
+        {
+          "id": "wave",
+          "file": "hands/wave.svg"
+        },
+        {
+          "id": "clap",
+          "file": "hands/clap.svg"
+        },
+        {
+          "id": "peace",
+          "file": "hands/peace.svg"
+        },
+        {
+          "id": "raised-hand",
+          "file": "hands/raised-hand.svg"
+        },
+        {
+          "id": "fist-bump",
+          "file": "hands/fist-bump.svg"
+        }
+      ]
+    },
+    {
+      "id": "objects",
+      "name": "ChipApp Objects",
+      "publisher": "ChipApp",
+      "stickers": [
+        {
+          "id": "heart",
+          "file": "objects/heart.svg"
+        },
+        {
+          "id": "star",
+          "file": "objects/star.svg"
+        },
+        {
+          "id": "fire",
+          "file": "objects/fire.svg"
+        },
+        {
+          "id": "party",
+          "file": "objects/party.svg"
+        },
+        {
+          "id": "coffee",
+          "file": "objects/coffee.svg"
+        },
+        {
+          "id": "gift",
+          "file": "objects/gift.svg"
+        },
+        {
+          "id": "rocket",
+          "file": "objects/rocket.svg"
+        },
+        {
+          "id": "cake",
+          "file": "objects/cake.svg"
+        },
+        {
+          "id": "thumbup-badge",
+          "file": "objects/thumbup-badge.svg"
+        },
+        {
+          "id": "check-badge",
+          "file": "objects/check-badge.svg"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "ChipApp",
+    "slug": "chipapp",
+    "version": "4.2.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "chipapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#25D366"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.chipapp.messenger",
+      "buildNumber": "4.2.0",
+      "infoPlist": {
+        "NSCameraUsageDescription": "ChipApp needs camera access to take photos and make video calls.",
+        "NSMicrophoneUsageDescription": "ChipApp needs microphone access for voice notes and calls.",
+        "NSPhotoLibraryUsageDescription": "ChipApp needs photo library access to share media in chats.",
+        "NSContactsUsageDescription": "ChipApp needs contacts access to find friends who use ChipApp.",
+        "CFBundleAllowMixedLocalizations": true,
+        "UIViewControllerBasedStatusBarAppearance": true
+      }
+    },
+    "android": {
+      "package": "com.chipapp.messenger",
+      "versionCode": 420,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#25D366"
+      },
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_CONTACTS",
+        "VIBRATE",
+        "INTERNET"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png",
+      "name": "ChipApp"
+    },
+    "plugins": ["expo-localization"],
+    "extra": {
+      "googleClientId": "68960926780-ti5kaoq71pvg7mb54am9q4176nvcee2i.apps.googleusercontent.com"
+    }
+  }
+}
