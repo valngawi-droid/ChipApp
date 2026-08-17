@@ -1,0 +1,30 @@
+{
+  "test-room": [
+    {
+      "id": "m-1",
+      "room": "test-room",
+      "text": "hello from A",
+      "kind": "text",
+      "timestamp": "2026-08-17T12:39:45.251Z",
+      "author": "test.user@chipapp.demo",
+      "authorName": "Test User",
+      "authorId": "demo-3428388712f5cc43",
+      "status": "delivered",
+      "savedAt": "2026-08-17T12:18:18.834Z",
+      "updatedAt": "2026-08-17T12:39:45.252Z"
+    },
+    {
+      "id": "m-2",
+      "room": "test-room",
+      "text": "private",
+      "kind": "text",
+      "timestamp": "2026-08-17T12:39:45.459Z",
+      "author": "test.user@chipapp.demo",
+      "authorName": "Test User",
+      "authorId": "demo-3428388712f5cc43",
+      "status": "delivered",
+      "savedAt": "2026-08-17T12:18:19.042Z",
+      "updatedAt": "2026-08-17T12:39:45.460Z"
+    }
+  ]
+}
