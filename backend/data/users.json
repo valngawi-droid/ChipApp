@@ -1,0 +1,12 @@
+{
+  "demo-3428388712f5cc43": {
+    "googleId": "demo-3428388712f5cc43",
+    "email": "test.user@chipapp.demo",
+    "name": "Test User",
+    "picture": null,
+    "demo": true,
+    "provider": "demo",
+    "updatedAt": "2026-08-17T12:18:17.280Z",
+    "createdAt": "2026-08-17T12:18:17.280Z"
+  }
+}
