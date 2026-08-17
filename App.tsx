@@ -10,12 +10,13 @@ import RootNavigator from './src/navigation';
 import { useAppStore } from './src/state/useAppStore';
 import { initializeSocket, socket, teardownSocket } from './src/api/socket';
 
-/** Bridges socket lifecycle + inbound events into the Zustand store. */
+/** Bridges socket lifecycle + inbound events into the Zustand store + persistent DB + realtime. */
 const RealtimeBridge: React.FC = () => {
   const token = useAppStore((s) => s.token);
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const setConnection = useAppStore((s) => s.setConnection);
   const receiveMessage = useAppStore((s) => s.receiveMessage);
+  const setMessagesFromHistory = useAppStore((s) => s.setMessagesFromHistory);
   const setTyping = useAppStore((s) => s.setTyping);
 
   useEffect(() => {
@@ -32,16 +33,30 @@ const RealtimeBridge: React.FC = () => {
     const onDisconnect = () => setConnection('offline');
     const onError = () => setConnection('offline');
 
-    const onReceive = (data: { room: string; id: string; text: string; timestamp: string; author?: string }) => {
+    const onReceive = (data: { room: string; id: string; text: string; timestamp: string; author?: string; authorName?: string; kind?: string }) => {
       receiveMessage(data.room, {
         id: data.id,
         text: data.text,
         isMe: false,
         timestamp: data.timestamp,
         status: 'delivered',
-        kind: 'text',
-        authorName: data.author,
+        kind: (data.kind as any) || 'text',
+        authorName: data.authorName || data.author,
       });
+    };
+
+    const onHistory = (payload: { room: string; messages: any[] }) => {
+      if (!payload || !payload.room || !Array.isArray(payload.messages)) return;
+      const mapped = payload.messages.map((m: any) => ({
+        id: m.id,
+        text: m.text,
+        isMe: false,
+        timestamp: m.timestamp,
+        status: 'delivered' as const,
+        kind: (m.kind || 'text') as any,
+        authorName: m.authorName || m.author,
+      }));
+      setMessagesFromHistory(payload.room, mapped);
     };
 
     const onPeerTyping = ({ room, typing }: { room: string; typing: boolean }) => setTyping(room, typing);
@@ -50,6 +65,7 @@ const RealtimeBridge: React.FC = () => {
     socket.on('disconnect', onDisconnect);
     socket.on('connect_error', onError);
     socket.on('receive_message', onReceive);
+    socket.on('chat_history', onHistory);
     socket.on('peer_typing', onPeerTyping);
 
     return () => {
@@ -57,9 +73,10 @@ const RealtimeBridge: React.FC = () => {
       socket.off('disconnect', onDisconnect);
       socket.off('connect_error', onError);
       socket.off('receive_message', onReceive);
+      socket.off('chat_history', onHistory);
       socket.off('peer_typing', onPeerTyping);
     };
-  }, [isAuthenticated, token, setConnection, receiveMessage, setTyping]);
+  }, [isAuthenticated, token, setConnection, receiveMessage, setMessagesFromHistory, setTyping]);
 
   return null;
 };
