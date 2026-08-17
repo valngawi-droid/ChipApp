@@ -400,7 +400,7 @@ if (staticRoot) {
     })
   );
 
-  app.get(/^\\/(?!api|socket\\.io).*/, (req, res, next) => {
+  app.get(/^\/(?!api|socket\.io).*/, (req, res, next) => {
     const indexPath = path.join(staticRoot, 'index.html');
     if (!fs.existsSync(indexPath)) return next();
     try {
