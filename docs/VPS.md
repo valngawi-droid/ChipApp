@@ -2,28 +2,27 @@
 
 Target: VPS Ubuntu/Debian dengan IP publik `69.33.213.153`, domain:
 
-- `chiperx.cyou`
-- `chiperx.my.id`
-- `pallrzki.my.id`
+- **`xerophis.pallrzki.my.id`**
 
 ## 1. Arahkan DNS
 
-Di tempat Anda membeli domain, buat record A untuk ketiga domain (dan `www`-nya):
+Di panel domain `pallrzki.my.id`, buat record:
 
-| Nama | Tipe | Nilai |
-|------|------|-------|
-| `@` | A | `69.33.213.153` |
-| `www` | A | `69.33.213.153` |
+| Tipe | Nama/Nama host | Nilai |
+|------|----------------|-------|
+| A | `xerophis` | `69.33.213.153` |
 
-Lakukan untuk ketiga domain. Tunggu propagasi (5 menit – 1 jam).
+Tunggu propagasi (5 menit – 1 jam). Cek:
+
+```bash
+dig +short xerophis.pallrzki.my.id
+```
 
 ## 2. Login ke VPS
 
 ```bash
 ssh root@69.33.213.153
 ```
-
-(atau user sudo lain).
 
 ## 3. Ambil kode & jalankan setup
 
@@ -37,39 +36,36 @@ bash scripts/setup-vps.sh
 Skrip otomatis memasang:
 
 - Node.js 20
-- MariaDB/MySQL (database `chipapp` dibuat otomatis)
+- MariaDB/MySQL (database `chipapp`, password acak)
 - Nginx (website + reverse proxy API & socket.io)
-- PM2 (menjaga backend tetap hidup, auto-start saat reboot)
+- PM2 (backend auto-start saat reboot)
 - Firewall
+
+Setelah selesai, website & API aktif di `http://xerophis.pallrzki.my.id`.
 
 ## 4. Aktifkan HTTPS (SSL gratis)
 
 ```bash
-certbot --nginx \
-  -d chiperx.cyou -d www.chiperx.cyou \
-  -d chiperx.my.id -d www.chiperx.my.id \
-  -d pallrzki.my.id -d www.pallrzki.my.id \
-  --redirect --non-interactive --agree-tos -m admin@chiperx.cyou
+certbot --nginx -d xerophis.pallrzki.my.id \
+  --redirect --non-interactive --agree-tos -m admin@pallrzki.my.id
 ```
 
-Setelah ini semua domain bisa diakses `https://...`.
+Setelah ini domain bisa diakses `https://xerophis.pallrzki.my.id`.
 
 ## 5. Cek
 
 ```bash
-curl https://chiperx.cyou/api/health
-# {"status":"ok","storage":"mysql","version":"5.1.0","domains":[...]}
+curl https://xerophis.pallrzki.my.id/api/health
+# {"status":"ok","storage":"mysql","version":"5.2.0","domain":"xerophis.pallrzki.my.id",...}
 ```
 
-## 6. Build APK yang mengarah ke VPS
+## 6. Build APK
 
-`eas.json` sudah di-set ke `https://chiperx.cyou`. Di mesin build:
+`eas.json` sudah di-set ke `https://xerophis.pallrzki.my.id`.
 
 ```bash
 EAS_SKIP_AUTO_FINGERPRINT=1 eas build --platform android --profile apk
 ```
-
-Atau pakai GitHub Actions / build lokal.
 
 ## Update ke versi baru
 
@@ -78,16 +74,16 @@ cd /opt/chipapp
 git pull
 npm install
 cd backend && npm install --omit=dev && cd ..
-EXPO_PUBLIC_API_URL=https://chiperx.cyou npx expo export --platform web --output-dir dist
+EXPO_PUBLIC_API_URL=https://xerophis.pallrzki.my.id npx expo export --platform web --output-dir dist
 cp -r dist/* /var/www/chipapp/
 pm2 restart chipapp-backend
 ```
 
-## Manajemen service
+## Manajemen
 
 ```bash
-pm2 status                 # cek backend
-pm2 logs chipapp-backend   # log
+pm2 status
+pm2 logs chipapp-backend
 pm2 restart chipapp-backend
 systemctl status nginx
 systemctl status mariadb

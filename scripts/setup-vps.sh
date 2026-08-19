@@ -23,7 +23,7 @@ APP_DIR="/opt/chipapp"
 DB_NAME="chipapp"
 DB_USER="chipapp"
 DB_PASS="chipapp_$(head -c 8 /dev/urandom | od -An -tx1 | tr -d ' \n')"
-DOMAINS=("chiperx.cyou" "chiperx.my.id" "pallrzki.my.id")
+DOMAINS=("xerophis.pallrzki.my.id")
 PRIMARY_DOMAIN="${DOMAINS[0]}"
 
 [ "$(id -u)" -eq 0 ] || fail "Jalankan sebagai root (sudo -i)."
@@ -104,7 +104,7 @@ cp -r dist/* /var/www/chipapp/
 
 # --- 8. Nginx -------------------------------------------------------------
 info "Menulis konfigurasi Nginx..."
-SERVER_NAMES="$(IFS=' '; echo "${DOMAINS[*]}") www.${DOMAINS[*]// / www.}"
+SERVER_NAMES="xerophis.pallrzki.my.id"
 cat > /etc/nginx/sites-available/chipapp <<EOF
 server {
     listen 80;
@@ -175,10 +175,9 @@ echo "App dir : $APP_DIR"
 echo
 echo "Credensial MariaDB tersimpan di $APP_DIR/backend/.env"
 echo
-warn "Langkah berikutnya: arahkan DNS ketiga domain ke IP VPS, lalu jalankan:"
+warn "Langkah berikutnya: arahkan DNS xerophis.pallrzki.my.id ke IP VPS, lalu jalankan:"
 echo
-echo "  certbot --nginx -d ${DOMAINS[0]} -d www.${DOMAINS[0]} \\"
-for d in "${DOMAINS[@]:1}"; do echo "    -d $d -d www.$d \\"; done
-echo "    --redirect --non-interactive --agree-tos -m admin@$PRIMARY_DOMAIN"
+echo "  certbot --nginx -d xerophis.pallrzki.my.id \\"
+echo "    --redirect --non-interactive --agree-tos -m admin@pallrzki.my.id"
 echo
 echo "Setelah SSL, APK build dengan EXPO_PUBLIC_API_URL=https://$PRIMARY_DOMAIN"

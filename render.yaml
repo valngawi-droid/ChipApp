@@ -21,7 +21,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: ALLOWED_ORIGINS
-        value: https://chiperx.cyou,https://www.chiperx.cyou,https://chiperx.my.id,https://www.chiperx.my.id,https://pallrzki.my.id,https://www.pallrzki.my.id
+        value: https://xerophis.pallrzki.my.id
       - key: DATABASE_URL
         sync: false
       - key: GOOGLE_CLIENT_ID

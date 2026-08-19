@@ -8,7 +8,7 @@
 # Termux server.
 #
 # Usage:
-#   EXPO_PUBLIC_API_URL=https://chiapp.chiperx.cyou bash scripts/build-web.sh
+#   EXPO_PUBLIC_API_URL=https://xerophis.pallrzki.my.id bash scripts/build-web.sh
 #
 set -euo pipefail
 cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

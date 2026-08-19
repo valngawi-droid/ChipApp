@@ -28,7 +28,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://chiperx.cyou"
+        "EXPO_PUBLIC_API_URL": "https://xerophis.pallrzki.my.id"
       }
     },
     "production": {

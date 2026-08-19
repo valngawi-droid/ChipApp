@@ -17,12 +17,7 @@ const server = http.createServer(app);
 // Domains pribadi yang boleh mengakses API/socket. Dapat di-override dengan
 // ALLOWED_ORIGINS (dipisah koma). Native app (origin kosong) selalu diizinkan.
 const DEFAULT_ORIGINS = [
-  'https://chiperx.cyou',
-  'https://www.chiperx.cyou',
-  'https://chiperx.my.id',
-  'https://www.chiperx.my.id',
-  'https://pallrzki.my.id',
-  'https://www.pallrzki.my.id',
+  'https://xerophis.pallrzki.my.id',
   'http://localhost:3000',
   'http://localhost:4000',
   'http://127.0.0.1:3000',
@@ -140,8 +135,8 @@ app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     service: 'chipapp-backend',
-    version: '5.1.0',
-    domains: ['chiperx.cyou', 'chiperx.my.id', 'pallrzki.my.id'],
+    version: '5.2.0',
+    domain: 'xerophis.pallrzki.my.id',
     storage: store.engine,
     uptimeSec: Math.round(process.uptime()),
     sockets: io.engine.clientsCount,

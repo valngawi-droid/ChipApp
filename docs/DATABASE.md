@@ -51,7 +51,7 @@ ChipApp backend v5.0.0 on http://0.0.0.0:4000 (storage: mysql)
 ## 3. Verifikasi
 
 ```bash
-curl https://chiapp.chiperx.cyou/api/health
+curl https://xerophis.pallrzki.my.id/api/health
 # {"storage":"mysql", ...}
 ```
 

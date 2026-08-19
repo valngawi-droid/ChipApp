@@ -14,7 +14,7 @@ set -euo pipefail
 
 cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-: "${EXPO_PUBLIC_API_URL:=https://chiapp.chiperx.cyou}"
+: "${EXPO_PUBLIC_API_URL:=https://xerophis.pallrzki.my.id}"
 KEYSTORE_PATH="${KEYSTORE_PATH:-$PWD/chipapp-ci.keystore}"
 KEYSTORE_PASSWORD="${KEYSTORE_PASSWORD:-chipapp_ci_password}"
 KEY_ALIAS="${KEY_ALIAS:-chipapp}"
