@@ -11,16 +11,61 @@ const jwt = require('jsonwebtoken');
 const { store, init: initStore } = require('./store');
 
 const app = express();
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 
+// Domains pribadi yang boleh mengakses API/socket. Dapat di-override dengan
+// ALLOWED_ORIGINS (dipisah koma). Native app (origin kosong) selalu diizinkan.
+const DEFAULT_ORIGINS = [
+  'https://chiperx.cyou',
+  'https://www.chiperx.cyou',
+  'https://chiperx.my.id',
+  'https://www.chiperx.my.id',
+  'https://pallrzki.my.id',
+  'https://www.pallrzki.my.id',
+  'http://localhost:3000',
+  'http://localhost:4000',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:4000',
+];
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+  .concat(DEFAULT_ORIGINS);
+
+const isAllowedOrigin = (origin) =>
+  !origin ||
+  allowedOrigins.includes(origin) ||
+  // Izinkan subdomain dari domain utama (mis. app.chiperx.cyou).
+  allowedOrigins.some((o) => {
+    try {
+      const allowed = new URL(o);
+      return origin.endsWith(`.${allowed.hostname}`);
+    } catch {
+      return false;
+    }
+  });
+
+const corsOptions = {
+  origin: (origin, cb) => cb(null, isAllowedOrigin(origin)),
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false,
+};
+
 const io = new Server(server, {
-  cors: { origin: '*', methods: ['GET', 'POST'] },
+  cors: {
+    origin: (origin, cb) => cb(null, isAllowedOrigin(origin)),
+    methods: ['GET', 'POST'],
+    credentials: false,
+  },
   transports: ['polling', 'websocket'],
   maxHttpBufferSize: 1e6,
 });
 
 app.use(express.json({ limit: '1mb' }));
-app.use(cors());
+app.use(cors(corsOptions));
 
 const CLIENT_ID =
   process.env.GOOGLE_CLIENT_ID ||
@@ -95,7 +140,8 @@ app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     service: 'chipapp-backend',
-    version: '5.0.0',
+    version: '5.1.0',
+    domains: ['chiperx.cyou', 'chiperx.my.id', 'pallrzki.my.id'],
     storage: store.engine,
     uptimeSec: Math.round(process.uptime()),
     sockets: io.engine.clientsCount,

@@ -1,0 +1,28 @@
+# Render deployment — ChipApp
+#
+# Backend web service (Node). Koneksikan sebuah MySQL eksternal lewat
+# DATABASE_URL, atau tambahkan layanan database MySQL di Render dan
+# salin connection string-nya ke environment variable.
+services:
+  - type: web
+    name: chipapp-backend
+    runtime: node
+    plan: free
+    buildCommand: cd backend && npm install --omit=dev
+    startCommand: node backend/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: https://chiperx.cyou,https://www.chiperx.cyou,https://chiperx.my.id,https://www.chiperx.my.id,https://pallrzki.my.id,https://www.pallrzki.my.id
+      - key: DATABASE_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false

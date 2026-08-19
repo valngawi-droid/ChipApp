@@ -1,6 +1,6 @@
 {
   "name": "chipapp-backend",
-  "version": "4.3.0",
+  "version": "5.1.0",
   "private": true,
   "description": "ChipApp secure backend — Express, Socket.io, Google OAuth verification, JWT sessions",
   "main": "server.js",
